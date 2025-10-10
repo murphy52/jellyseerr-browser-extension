@@ -246,7 +246,7 @@ class IMDBJellyseerrIntegration {
     statusSection.innerHTML = `
       <div class="jellyseerr-media-info">
         <h3 class="jellyseerr-title">${this.mediaData.title}</h3>
-        <p class="jellyseerr-year">${this.mediaData.year} • ${this.mediaData.mediaType === 'tv' ? 'TV Series' : 'Movie'}</p>
+        <p class="jellyseerr-year">${this.mediaData.year || 'Unknown Year'} • ${this.mediaData.mediaType === 'tv' ? 'TV Series' : 'Movie'}</p>
       </div>
       <div class="jellyseerr-status-indicator">
         <div class="jellyseerr-status-icon loading"></div>
@@ -338,7 +338,7 @@ class IMDBJellyseerrIntegration {
         status: 'available',
         buttonText: 'Request on Jellyseerr',
         buttonClass: 'request',
-        message: 'Ready to request'
+        message: 'Not requested'
       });
     }
   }
@@ -355,7 +355,7 @@ class IMDBJellyseerrIntegration {
     
     let iconPath = 'M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z'; // Default plus icon
     let statusIconClass = 'available';
-    let statusText = statusData.message || 'Available to request';
+    let statusText = statusData.message || 'Not requested';
     
     // Choose appropriate icon and status indicator based on status
     switch (statusData.status) {
@@ -470,6 +470,12 @@ class IMDBJellyseerrIntegration {
     if (!this.mediaData) {
       this.showNotification('Error', 'Could not extract media information', 'error');
       return;
+    }
+
+    // Update status indicator to show searching state
+    if (this.statusIcon && this.statusText) {
+      this.statusIcon.className = 'jellyseerr-status-icon loading';
+      this.statusText.textContent = `Searching Jellyseerr for "${this.mediaData.title}"...`;
     }
 
     this.button.classList.add('loading');
