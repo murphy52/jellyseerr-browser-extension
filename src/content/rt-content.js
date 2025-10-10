@@ -263,14 +263,15 @@ class RTJellyseerrIntegration {
     const tab = document.createElement('div');
     tab.className = 'jellyseerr-tab';
     tab.innerHTML = `
-      <svg class="jellyseerr-tab-icon jellyseerr-connection-status grey" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+      <svg class="jellyseerr-tab-icon jellyseerr-connection-status checking" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+        <path class="jellyseerr-icon-path" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
       </svg>
       <span class="jellyseerr-tab-text">Jellyseerr</span>
     `;
     
-    // Store reference to the connection status icon
+    // Store references to the tab icon elements
     this.connectionStatusIcon = tab.querySelector('.jellyseerr-connection-status');
+    this.tabIconPath = tab.querySelector('.jellyseerr-icon-path');
     
     // Create the content panel (expandable)
     const panel = document.createElement('div');
@@ -347,6 +348,18 @@ class RTJellyseerrIntegration {
         return result;
       },
       updateTabStatus: (status) => this.updateTabStatus(status || 'available'),
+      testIcons: () => {
+        console.log('Testing all tab icon states...');
+        const states = ['checking', 'available', 'pending', 'downloading', 'available_watch', 'error'];
+        let i = 0;
+        const cycle = () => {
+          this.updateTabStatus(states[i]);
+          console.log('Tab icon:', states[i]);
+          i = (i + 1) % states.length;
+          if (i !== 0) setTimeout(cycle, 2000);
+        };
+        cycle();
+      },
       debugSearch: async () => {
         try {
           const result = await new Promise((resolve, reject) => {
@@ -467,36 +480,44 @@ class RTJellyseerrIntegration {
   }
   
   updateTabStatus(status) {
-    if (!this.connectionStatusIcon) return;
+    if (!this.connectionStatusIcon || !this.tabIconPath) return;
     
-    let statusClass;
+    let statusClass, iconPath;
+    
     switch (status) {
       case 'checking':
       case 'loading':
         statusClass = 'jellyseerr-tab-icon jellyseerr-connection-status checking';
+        iconPath = 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z'; // Checkmark (loading)
         break;
       case 'available':
-        statusClass = 'jellyseerr-tab-icon jellyseerr-connection-status available'; // Green
+        statusClass = 'jellyseerr-tab-icon jellyseerr-connection-status available';
+        iconPath = 'M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z'; // Plus icon (ready to request)
         break;
       case 'requested':
       case 'pending':
-        statusClass = 'jellyseerr-tab-icon jellyseerr-connection-status pending'; // Orange
+        statusClass = 'jellyseerr-tab-icon jellyseerr-connection-status pending';
+        iconPath = 'M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M7,13H11V7H13V13H17V15H13V21H11V15H7V13Z'; // Clock icon
         break;
       case 'downloading':
-        statusClass = 'jellyseerr-tab-icon jellyseerr-connection-status downloading'; // Blue
+        statusClass = 'jellyseerr-tab-icon jellyseerr-connection-status downloading';
+        iconPath = 'M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z'; // Download icon
         break;
       case 'available_watch':
       case 'partial':
-        statusClass = 'jellyseerr-tab-icon jellyseerr-connection-status ready'; // Green (ready to watch)
+        statusClass = 'jellyseerr-tab-icon jellyseerr-connection-status ready';
+        iconPath = 'M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'; // Checkmark icon (ready to watch)
         break;
       case 'error':
       default:
-        statusClass = 'jellyseerr-tab-icon jellyseerr-connection-status error'; // Red (connection/server error)
+        statusClass = 'jellyseerr-tab-icon jellyseerr-connection-status error';
+        iconPath = 'M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z'; // X icon
         break;
     }
     
     this.connectionStatusIcon.setAttribute('class', statusClass);
-    log('Tab icon updated to status:', status);
+    this.tabIconPath.setAttribute('d', iconPath);
+    log('Tab icon updated to status:', status, 'with', iconPath.includes('19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z') ? 'plus' : iconPath.includes('16.17L4.83') ? 'checkmark' : 'other', 'icon');
   }
   
   async updateButtonWithStatus() {
