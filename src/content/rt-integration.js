@@ -220,23 +220,23 @@ class RottenTomatoesIntegration extends BaseIntegration {
       
       /* RT tab status colors - optimized for red theme visibility */
       .jellyseerr-connection-status.available {
-        color: #3478c1 !important; /* RT blue for available */
+        color: #ffffff !important; /* White for available - no vibrating colors */
       }
       
       .jellyseerr-connection-status.pending {
-        color: #ff8800 !important; /* RT orange for pending */
+        color: #ffffff !important; /* White for pending - better visibility than orange on red */
       }
       
       .jellyseerr-connection-status.downloading {
-        color: #3478c1 !important; /* RT blue for downloading */
+        color: #87ceeb !important; /* Light blue for downloading - softer than vibrating blue */
       }
       
       .jellyseerr-connection-status.ready {
-        color: #3478c1 !important; /* RT blue for ready */
+        color: #ffffff !important; /* White for ready */
       }
       
       .jellyseerr-connection-status.partial {
-        color: #3478c1 !important; /* RT blue for partial */
+        color: #ffffff !important; /* White for partial */
       }
       
       .jellyseerr-connection-status.error {
