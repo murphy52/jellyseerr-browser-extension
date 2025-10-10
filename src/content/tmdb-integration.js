@@ -201,25 +201,33 @@ class TMDbIntegration extends BaseIntegration {
         background: #90cea1 !important; /* TMDb green since content is available */
       }
       
-      /* TMDb tab status colors - optimized for blue theme visibility */
+      /* TMDb tab status colors - white for better visibility on blue gradient */
       .jellyseerr-connection-status.available {
-        color: #90cea1 !important; /* TMDb green */
+        color: #ffffff !important; /* White - matches tab text, excellent contrast */
       }
       
       .jellyseerr-connection-status.pending {
-        color: #fdb462 !important; /* Warm orange */
+        color: #ffffff !important; /* White - much better visibility than orange */
       }
       
       .jellyseerr-connection-status.downloading {
-        color: #01b4e4 !important; /* TMDb blue */
+        color: #ffffff !important; /* White - better than blue on blue */
+      }
+      
+      .jellyseerr-connection-status.ready {
+        color: #ffffff !important; /* White for consistency */
       }
       
       .jellyseerr-connection-status.error {
-        color: #e74c3c !important; /* Clear red */
+        color: #ffcccc !important; /* Light red - visible but distinct */
       }
       
       .jellyseerr-connection-status.partial {
-        color: #90cea1 !important; /* TMDb green */
+        color: #ffffff !important; /* White for consistency */
+      }
+      
+      .jellyseerr-connection-status.checking {
+        color: #e0e0e0 !important; /* Light gray for loading state */
       }
     `;
   }
