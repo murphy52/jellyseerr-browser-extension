@@ -499,6 +499,15 @@ class IMDBJellyseerrIntegration {
         'success'
       );
 
+      // Auto-close flyout after successful request
+      setTimeout(() => {
+        if (this.flyout && this.flyout.classList.contains('expanded')) {
+          this.flyout.classList.remove('expanded');
+          this.flyout.classList.add('collapsed');
+          log('Auto-closing flyout after successful request');
+        }
+      }, 4000);
+
       // Update status after successful request
       setTimeout(async () => {
         await this.updateButtonWithStatus();
