@@ -328,19 +328,40 @@ class IMDBJellyseerrIntegration {
           log('✅ Button is visible!');
         } else {
           warn('⚠️ Button not visible, applying emergency styles...');
-          this.button.style.cssText = `
+        }
+        
+        // ALWAYS apply emergency styles to ensure visibility
+        log('🚨 Applying emergency visibility styles to guarantee button is visible...');
+        this.button.style.cssText = `
+          display: block !important;
+          visibility: visible !important;
+          opacity: 1 !important;
+          background: #5B21B6 !important;
+          color: white !important;
+          padding: 15px 25px !important;
+          margin: 20px 0 !important;
+          border: 3px solid yellow !important;
+          border-radius: 8px !important;
+          cursor: pointer !important;
+          font-size: 16px !important;
+          font-weight: bold !important;
+          position: relative !important;
+          z-index: 9999 !important;
+          width: auto !important;
+          max-width: 300px !important;
+        `;
+        
+        // Also style the container
+        const container = this.button.parentNode;
+        if (container) {
+          container.style.cssText = `
             display: block !important;
             visibility: visible !important;
             opacity: 1 !important;
-            background: #5B21B6 !important;
-            color: white !important;
-            padding: 10px 20px !important;
-            margin: 10px 0 !important;
-            border: none !important;
-            border-radius: 5px !important;
-            cursor: pointer !important;
-            font-size: 14px !important;
-            font-weight: 500 !important;
+            margin: 20px 0 !important;
+            padding: 10px !important;
+            background: rgba(255, 0, 0, 0.1) !important;
+            border: 2px solid red !important;
           `;
         }
       }, 500);
