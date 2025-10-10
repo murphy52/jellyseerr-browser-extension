@@ -123,37 +123,57 @@ A browser extension that seamlessly integrates with IMDB, Rotten Tomatoes, TheMo
 - **Metacritic**: Movie pages (`metacritic.com/movie/*`) and TV pages (`metacritic.com/tv/*`) 🟡 **Professional Reviews**
 - **Trakt**: Movie pages (`trakt.tv/movies/*`, `app.trakt.tv/movies/*`) and TV show pages (`trakt.tv/shows/*`, `app.trakt.tv/shows/*`) 🆕 **Tracking Integration**
 
-## File Structure
+## 🏗️ Architecture
+
+### **Shared Library System**
+All 6 site integrations use a unified architecture for consistency and maintainability:
 
 ```
 jellyseerr-browser-extension/
-├── manifest.json              # Extension manifest
+├── manifest.json              # Extension manifest (Manifest v3)
 ├── src/
+│   ├── shared/                # 🔄 Shared Libraries
+│   │   ├── BaseIntegration.js # Base class for all sites
+│   │   ├── JellyseerrClient.js # API communication
+│   │   ├── MediaExtractor.js   # Title/year extraction
+│   │   └── UIComponents.js     # Flyout/button creation
+│   ├── content/               # 🌐 Site Integrations  
+│   │   ├── imdb-integration.js     # IMDB (Yellow theme)
+│   │   ├── rt-integration.js       # Rotten Tomatoes (Red theme)
+│   │   ├── tmdb-integration.js     # TheMovieDB (Blue theme)
+│   │   ├── letterboxd-integration.js # Letterboxd (Green theme)
+│   │   ├── metacritic-integration.js # Metacritic (Yellow theme)
+│   │   └── trakt-integration.js    # Trakt (Purple/Pink theme)
 │   ├── background/
-│   │   └── background.js      # Service worker for API calls
-│   ├── content/
-│   │   ├── content-styles.css # Button styles
-│   │   ├── imdb-content.js    # IMDB page integration
-│   │   └── rt-content.js      # Rotten Tomatoes integration
+│   │   └── background.js      # Service worker + API handling
 │   ├── options/
 │   │   ├── options.html       # Settings page
-│   │   ├── options.css        # Settings page styles
-│   │   └── options.js         # Settings page logic
+│   │   ├── options.css        # Settings styling
+│   │   └── options.js         # Settings logic + manual reload
 │   └── popup/
 │       ├── popup.html         # Extension popup
-│       ├── popup.css          # Popup styles
-│       └── popup.js           # Popup logic
-├── icons/                     # Extension icons
-└── README.md                  # This file
+│       ├── popup.css          # Popup styling
+│       └── popup.js           # Status display
+├── icons/                     # Extension icons (16, 32, 48, 128px)
+├── README.md                  # Documentation
+├── CHANGELOG.md               # Version history
+└── TESTING-CHECKLIST.md       # QA testing guide
 ```
 
-## How It Works
+### **Benefits of Shared Architecture**
+- ✅ **Consistent UX**: All sites have identical flyout interface
+- ✅ **Easy Maintenance**: Bug fixes apply to all sites simultaneously  
+- ✅ **Rapid Development**: New sites require only ~200 lines of code
+- ✅ **Brand Flexibility**: Each site maintains its unique visual identity
 
-1. **Content Scripts**: Injected into IMDB and Rotten Tomatoes pages to extract movie/TV metadata
-2. **Media Detection**: Identifies title, year, media type (movie/TV), and other metadata from page content
-3. **API Integration**: Background script handles communication with Jellyseerr API
-4. **Search & Match**: Searches Jellyseerr database to find the correct media entry
-5. **Request Submission**: Submits request to Jellyseerr with proper media ID and user preferences
+## 🔍 How It Works
+
+1. **Content Scripts**: Injected into all 6 supported sites to extract movie/TV metadata
+2. **Media Detection**: BaseIntegration identifies title, year, media type, and IMDB/TMDb IDs from page content
+3. **API Communication**: JellyseerrClient handles all background script communication with Jellyseerr API
+4. **Search & Match**: Advanced search with multiple fallback terms finds the correct media entry
+5. **Status Monitoring**: Real-time status checking with monitoring indicators for TV shows
+6. **Request Submission**: Submits request to Jellyseerr with proper media ID and user preferences
 
 ## 🔧 Troubleshooting
 

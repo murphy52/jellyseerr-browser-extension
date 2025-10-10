@@ -5,7 +5,7 @@ All notable changes to the Jellyseerr Request Button extension will be documente
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.4.1] - 2025-10-10 🔧 Bug Fixes + Monitoring Feature
+## [1.4.1] - 2025-10-10 🎨 UI/UX Polish + Critical Bug Fixes
 
 ### ✨ Added
 - **Monitoring Indicator**: Shows if TV shows are being monitored for future releases (Issue #4)
@@ -20,10 +20,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added manual "Reload Settings" button in options page as fallback
   - Settings changes now take effect immediately without extension reload
 
+### 🎨 UI/UX Improvements
+- **Status Color Optimization**: Perfect visibility across all 6 site themes
+  - **Rotten Tomatoes**: White icons on red background (eliminated color vibration)
+  - **IMDB**: Black icons on yellow background (matches tab text)
+  - **TMDb**: White icons on blue gradient with prominent red for errors
+  - **Letterboxd**: White icons on green background (clean contrast)
+  - **Metacritic**: Black icons on yellow background (consistent with IMDB)
+  - **Trakt**: Green/yellow/blue palette on red/purple gradient (harmonious colors)
+- **Enhanced Error Visibility**: More prominent error colors for better user feedback
+- **Brand Consistency**: Status colors now perfectly complement each site's theme
+
 ### 🔧 Technical Improvements
-- Cleaned up background script storage listeners architecture
-- Enhanced debug logging for settings changes
-- Improved error handling and user feedback in options page
+- **Code Cleanup**: Removed unused files and development artifacts
+  - Eliminated obsolete `flyout-styles.css` and development documentation
+  - Cleaned up `.DS_Store` files and unnecessary proposals
+  - Project structure now lean and production-focused
+- **Architecture Consistency**: Enhanced storage listeners and error handling
+- **Debug Logging**: Improved settings change monitoring and troubleshooting
+- **Production Readiness**: All debug modes disabled, optimal performance
 
 ## [1.4.0] - 2025-10-10 🚀 MAJOR RELEASE - Trakt Integration + SPA Navigation
 
