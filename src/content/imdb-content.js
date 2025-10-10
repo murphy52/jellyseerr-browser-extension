@@ -19,56 +19,17 @@ class IMDBJellyseerrIntegration {
   async init() {
     log('Script initializing on', window.location.href);
     
-    // Multiple triggers to ensure we catch the page load
-    // 1. Immediate attempt
-    log('Immediate extraction attempt');
-    this.extractMediaData();
-    
-    // 2. DOMContentLoaded
-    if (document.readyState === 'loading') {
-      log('Document still loading, waiting for DOMContentLoaded');
-      document.addEventListener('DOMContentLoaded', () => {
-        log('DOMContentLoaded triggered');
-        this.extractMediaData();
-      });
-    } else {
-      log('Document already ready, state:', document.readyState);
-    }
-    
-    // 3. Window load event (in case content is loaded after DOM)
-    window.addEventListener('load', () => {
-      log('Window load event triggered');
+    // Wait for page to be ready and then try extraction
+    setTimeout(() => {
       this.extractMediaData();
-    });
-
-    // 4. Multiple delayed attempts for dynamic content
-    [1000, 2000, 5000].forEach((delay, index) => {
-      setTimeout(() => {
-        log(`Retry extraction attempt ${index + 1} after ${delay}ms`);
-        this.extractMediaData();
-      }, delay);
-    });
+    }, 1000);
     
-    // 5. Add a mutation observer to watch for dynamic changes
-    if (typeof MutationObserver !== 'undefined') {
-      const observer = new MutationObserver((mutations) => {
-        if (!this.button && mutations.some(m => m.addedNodes.length > 0)) {
-          log('DOM mutation detected, trying extraction');
-          this.extractMediaData();
-        }
-      });
-      
-      observer.observe(document.body, {
-        childList: true,
-        subtree: true
-      });
-      
-      // Stop observing after 10 seconds to prevent infinite loops
-      setTimeout(() => {
-        observer.disconnect();
-        log('Mutation observer disconnected');
-      }, 10000);
-    }
+    // Additional attempt after more time
+    setTimeout(() => {
+      if (!this.button) {
+        this.extractMediaData();
+      }
+    }, 3000);
   }
 
   extractMediaData() {
@@ -344,223 +305,38 @@ class IMDBJellyseerrIntegration {
     // Add button to container first
     buttonContainer.appendChild(this.button);
     log('Button element created successfully');
-
-    const containerTestId = container.getAttribute('data-testid');
-    log('Container data-testid:', containerTestId);
     
-    // NEVER insert inside content containers - always insert after or in a dedicated space
-    let insertionSuccessful = false;
-    
-    if (containerTestId && (containerTestId.includes('hero') || containerTestId.includes('title-pc'))) {
-      // For hero section elements, find the hero title block parent and insert after the whole hero section
-      let heroParent = container;
-      
-      // Walk up the DOM to find the main hero container
-      while (heroParent && !heroParent.getAttribute('data-testid')?.includes('hero-title-block') && heroParent.parentNode) {
-        if (heroParent.parentNode.getAttribute('data-testid')?.includes('hero')) {
-          heroParent = heroParent.parentNode;
-          break;
-        }
-        heroParent = heroParent.parentNode;
-      }
-      
-      if (heroParent && heroParent.parentNode) {
-        // Insert after the entire hero section
-        heroParent.parentNode.insertBefore(buttonContainer, heroParent.nextSibling);
-        log('Inserted button after entire hero section:', heroParent.getAttribute('data-testid'));
-        insertionSuccessful = true;
-      }
-    } 
-    
-    if (!insertionSuccessful && containerTestId === 'title-details-section') {
-      // For the details section (last resort), insert at the top
-      container.insertBefore(buttonContainer, container.firstChild);
-      log('Inserted button at top of details section');
-      insertionSuccessful = true;
-    }
-    
-    if (!insertionSuccessful) {
-      // Generic fallback - always insert AFTER, never inside
-      if (container.parentNode) {
-        container.parentNode.insertBefore(buttonContainer, container.nextSibling);
-        log('Inserted button after container (fallback):', container.tagName, containerTestId);
-        insertionSuccessful = true;
-      } else {
-        // Last resort - find a better parent
-        const pageGrid = document.querySelector('.ipc-page-grid');
-        const contentContainer = document.querySelector('.ipc-page-content-container');
-        
-        if (pageGrid) {
-          pageGrid.insertBefore(buttonContainer, pageGrid.firstChild);
-          log('Inserted button at top of page grid');
-          insertionSuccessful = true;
-        } else if (contentContainer) {
-          contentContainer.insertBefore(buttonContainer, contentContainer.firstChild);
-          log('Inserted button at top of content container');
-          insertionSuccessful = true;
-        } else {
-          container.appendChild(buttonContainer);
-          log('Appended button to container as last resort:', container.tagName, containerTestId);
-        }
-      }
-    }
-    
-    // Skip the complex insertion logic since we're appending to body
-    /*
-    const containerTestId = container.getAttribute('data-testid');
-    log('Container data-testid:', containerTestId);
-    
-    // NEVER insert inside content containers - always insert after or in a dedicated space
-    let insertionSuccessful = false;
-    
-    if (containerTestId && (containerTestId.includes('hero') || containerTestId.includes('title-pc'))) {
-      // For hero section elements, find the hero title block parent and insert after the whole hero section
-      let heroParent = container;
-      
-      // Walk up the DOM to find the main hero container
-      while (heroParent && !heroParent.getAttribute('data-testid')?.includes('hero-title-block') && heroParent.parentNode) {
-        if (heroParent.parentNode.getAttribute('data-testid')?.includes('hero')) {
-          heroParent = heroParent.parentNode;
-          break;
-        }
-        heroParent = heroParent.parentNode;
-      }
-      
-      if (heroParent && heroParent.parentNode) {
-        // Insert after the entire hero section
-        heroParent.parentNode.insertBefore(buttonContainer, heroParent.nextSibling);
-        log('Inserted button after entire hero section:', heroParent.getAttribute('data-testid'));
-        insertionSuccessful = true;
-      }
-    } 
-    
-    if (!insertionSuccessful && containerTestId === 'title-details-section') {
-      // For the details section (last resort), insert at the top
-      container.insertBefore(buttonContainer, container.firstChild);
-      log('Inserted button at top of details section');
-      insertionSuccessful = true;
-    }
-    
-    if (!insertionSuccessful) {
-      // Generic fallback - always insert AFTER, never inside
-      if (container.parentNode) {
-        container.parentNode.insertBefore(buttonContainer, container.nextSibling);
-        log('Inserted button after container (fallback):', container.tagName, containerTestId);
-        insertionSuccessful = true;
-      } else {
-        // Last resort - find a better parent
-        const pageGrid = document.querySelector('.ipc-page-grid');
-        const contentContainer = document.querySelector('.ipc-page-content-container');
-        
-        if (pageGrid) {
-          pageGrid.insertBefore(buttonContainer, pageGrid.firstChild);
-          log('Inserted button at top of page grid');
-          insertionSuccessful = true;
-        } else if (contentContainer) {
-          contentContainer.insertBefore(buttonContainer, contentContainer.firstChild);
-          log('Inserted button at top of content container');
-          insertionSuccessful = true;
-        } else {
-          container.appendChild(buttonContainer);
-          log('Appended button to container as last resort:', container.tagName, containerTestId);
-        }
-      }
-    }
-    */
+    // Simple insertion - just append to the found container
+    container.appendChild(buttonContainer);
+    log('Button container added to:', container.getAttribute('data-testid') || container.className || container.tagName);
     
     // Verify button was inserted
     if (document.contains(this.button)) {
       log('✅ Button successfully added to DOM!');
       
-      // Debug button visibility
+      // Simple visibility check
       setTimeout(() => {
         const buttonRect = this.button.getBoundingClientRect();
-        const containerRect = buttonContainer.getBoundingClientRect();
-        const computedStyle = window.getComputedStyle(this.button);
-        const containerStyle = window.getComputedStyle(buttonContainer);
-        
-        log('🔍 Button visibility debugging:');
-        log('Button rect:', `x:${buttonRect.x}, y:${buttonRect.y}, width:${buttonRect.width}, height:${buttonRect.height}`);
-        log('Container rect:', `x:${containerRect.x}, y:${containerRect.y}, width:${containerRect.width}, height:${containerRect.height}`);
-        log('Button display:', computedStyle.display);
-        log('Button visibility:', computedStyle.visibility);
-        log('Button opacity:', computedStyle.opacity);
-        log('Button position:', computedStyle.position);
-        log('Button z-index:', computedStyle.zIndex);
-        log('Button background:', computedStyle.background);
-        log('Button backgroundColor:', computedStyle.backgroundColor);
-        log('Button color:', computedStyle.color);
-        log('Button className:', this.button.className);
-        log('Button style attribute:', this.button.getAttribute('style'));
-        log('Container display:', containerStyle.display);
-        log('Container visibility:', containerStyle.visibility);
-        log('Container opacity:', containerStyle.opacity);
-        
-        // Check if button is within viewport
-        const viewportHeight = window.innerHeight;
-        const viewportWidth = window.innerWidth;
-        const isInViewport = buttonRect.x >= 0 && buttonRect.y >= 0 && 
-                           buttonRect.right <= viewportWidth && buttonRect.bottom <= viewportHeight;
-        log('📺 Viewport check:', `viewport: ${viewportWidth}x${viewportHeight}, button in viewport: ${isInViewport}`);
-        
-        // Check parent elements for hidden styles
-        let parent = this.button.parentElement;
-        let level = 0;
-        while (parent && level < 5) {
-          const parentStyle = window.getComputedStyle(parent);
-          log(`👨‍👩‍👧 Parent ${level}:`, {
-            tagName: parent.tagName,
-            className: parent.className,
-            display: parentStyle.display,
-            visibility: parentStyle.visibility,
-            opacity: parentStyle.opacity,
-            overflow: parentStyle.overflow
-          });
-          parent = parent.parentElement;
-          level++;
-        }
-        
-        // Check if button is visible
-        const isVisible = buttonRect.width > 0 && buttonRect.height > 0 && 
-                         computedStyle.display !== 'none' && 
-                         computedStyle.visibility !== 'hidden' && 
-                         computedStyle.opacity !== '0';
+        const isVisible = buttonRect.width > 0 && buttonRect.height > 0;
         
         if (isVisible) {
-          log('✅ Button should be visible!');
+          log('✅ Button is visible!');
         } else {
-          warn('⚠️ Button is in DOM but not visible!');
-          
-          // Try to make it more visible
-          log('Attempting to force button visibility...');
-          this.button.style.cssText += `
+          warn('⚠️ Button not visible, applying emergency styles...');
+          this.button.style.cssText = `
             display: block !important;
             visibility: visible !important;
             opacity: 1 !important;
-            position: relative !important;
-            z-index: 999999 !important;
-            background: red !important;
+            background: #5B21B6 !important;
             color: white !important;
-            border: 3px solid yellow !important;
-            padding: 20px !important;
-            margin: 20px !important;
-            font-size: 18px !important;
-            font-weight: bold !important;
+            padding: 10px 20px !important;
+            margin: 10px 0 !important;
+            border: none !important;
+            border-radius: 5px !important;
+            cursor: pointer !important;
+            font-size: 14px !important;
+            font-weight: 500 !important;
           `;
-          
-          buttonContainer.style.cssText += `
-            display: block !important;
-            visibility: visible !important;
-            opacity: 1 !important;
-            position: relative !important;
-            z-index: 999999 !important;
-            background: blue !important;
-            padding: 10px !important;
-            margin: 10px !important;
-            border: 2px solid green !important;
-          `;
-          
-          log('Applied emergency visibility styles');
         }
       }, 500);
       
