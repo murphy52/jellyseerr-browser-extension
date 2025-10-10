@@ -384,11 +384,51 @@ class IMDBJellyseerrIntegration {
     
     if (shouldInsertAfter && container.parentNode) {
       log('ATTEMPTING: Insert AFTER element (not inside)');
+      
+      // For watchlist elements, try to find a better parent container to avoid nesting
+      let targetContainer = container;
+      let insertionParent = container.parentNode;
+      
+      if (isWatchlistSelector) {
+        log('Watchlist selector detected - looking for better parent container');
+        
+        // Walk up to find a more appropriate parent (section, div with meaningful class, etc.)
+        let current = container;
+        let attempts = 0;
+        while (current.parentNode && attempts < 3) {
+          const parent = current.parentNode;
+          const parentClass = parent.className || '';
+          const parentTestId = parent.getAttribute('data-testid') || '';
+          
+          log(`Parent ${attempts + 1}:`, {
+            tagName: parent.tagName,
+            className: parentClass.substring(0, 50),
+            'data-testid': parentTestId,
+            hasMultipleChildren: parent.children.length > 1
+          });
+          
+          // If parent has multiple children or is a section/container, use it
+          if (parent.children.length > 1 || 
+              parent.tagName === 'SECTION' || 
+              parentClass.includes('section') ||
+              parentClass.includes('container') ||
+              parentTestId.includes('section')) {
+            targetContainer = current;
+            insertionParent = parent;
+            log(`Using parent container for insertion:`, parent.tagName, parentClass.substring(0, 30));
+            break;
+          }
+          
+          current = parent;
+          attempts++;
+        }
+      }
+      
       try {
-        container.parentNode.insertBefore(buttonContainer, container.nextSibling);
-        log('✅ SUCCESS: Inserted button after element');
+        insertionParent.insertBefore(buttonContainer, targetContainer.nextSibling);
+        log('✅ SUCCESS: Inserted button after element (using parent:', insertionParent.tagName, ')');
       } catch (e) {
-        log('❌ FAILED to insert after, trying inside:', e.message);
+        log('❌ FAILED to insert after, trying inside original container:', e.message);
         container.appendChild(buttonContainer);
       }
     } else {
