@@ -313,7 +313,7 @@ class IMDBJellyseerrIntegration {
         console.log('🔧 [Debug] Connection test result:', result);
         return result;
       },
-      updateConnectionStatus: () => this.updateConnectionStatus(),
+      updateTabStatus: (status) => this.updateTabStatus(status || 'available'),
       getStatus: async () => {
         try {
           const status = await this.getMediaStatus(this.mediaData);
@@ -328,47 +328,69 @@ class IMDBJellyseerrIntegration {
     
     log('Debug functions added to window.jellyseerr_debug');
     
-    // Check connection status and update tab icon
-    await this.updateConnectionStatus();
-    
-    // Check media status and update button
+    // Check media status and update both tab icon and button
     await this.updateButtonWithStatus();
   }
   
-  async updateConnectionStatus() {
+  updateTabStatus(status) {
     if (!this.connectionStatusIcon) return;
     
-    try {
-      // Test connection to Jellyseerr server
-      const isConnected = await this.testConnection();
-      
-      if (isConnected) {
-        // Green - connected
-        this.connectionStatusIcon.setAttribute('class', 'jellyseerr-tab-icon jellyseerr-connection-status green');
-        log('✅ Connection to Jellyseerr server: OK');
-      } else {
-        // Red - disconnected
-        this.connectionStatusIcon.setAttribute('class', 'jellyseerr-tab-icon jellyseerr-connection-status red');
-        warn('❌ Connection to Jellyseerr server: FAILED');
-      }
-    } catch (error) {
-      // Red - error
-      this.connectionStatusIcon.setAttribute('class', 'jellyseerr-tab-icon jellyseerr-connection-status red');
-      error('❌ Connection test error:', error);
+    let statusClass;
+    switch (status) {
+      case 'checking':
+      case 'loading':
+        statusClass = 'jellyseerr-tab-icon jellyseerr-connection-status checking';
+        break;
+      case 'available':
+        statusClass = 'jellyseerr-tab-icon jellyseerr-connection-status available'; // Green
+        break;
+      case 'requested':
+      case 'pending':
+        statusClass = 'jellyseerr-tab-icon jellyseerr-connection-status pending'; // Orange
+        break;
+      case 'downloading':
+        statusClass = 'jellyseerr-tab-icon jellyseerr-connection-status downloading'; // Blue
+        break;
+      case 'available_watch':
+      case 'partial':
+        statusClass = 'jellyseerr-tab-icon jellyseerr-connection-status ready'; // Green (ready to watch)
+        break;
+      case 'error':
+      default:
+        statusClass = 'jellyseerr-tab-icon jellyseerr-connection-status error'; // Red (connection/server error)
+        break;
     }
+    
+    this.connectionStatusIcon.setAttribute('class', statusClass);
+    log('Tab icon updated to status:', status);
   }
   
   async updateButtonWithStatus() {
+    // Start with loading/checking animation on tab
+    this.updateTabStatus('checking');
+    
     try {
       log('Checking media status...');
       const statusData = await this.getMediaStatus(this.mediaData);
       log('Media status received:', statusData);
       
+      // Update both flyout and tab with status
       this.updateButtonAppearance(statusData);
+      this.updateTabStatus(statusData.status);
       
     } catch (error) {
       error('Error checking media status:', error);
-      // Fall back to default request button
+      
+      // Check if this is a connection error
+      if (error.message && (error.message.includes('connect') || error.message.includes('Receiving end does not exist'))) {
+        // Connection/server error - show error state on tab
+        this.updateTabStatus('error');
+      } else {
+        // Other error - assume available
+        this.updateTabStatus('available');
+      }
+      
+      // Fall back to default request button in flyout
       this.updateButtonAppearance({
         status: 'available',
         buttonText: 'Request on Jellyseerr',
@@ -780,17 +802,31 @@ class IMDBJellyseerrIntegration {
   opacity: 0.9;
 }
 
-/* Connection status colors for tab icon */
-.jellyseerr-connection-status.grey {
-  color: #9ca3af !important;
+/* Tab status colors - match flyout status colors */
+.jellyseerr-connection-status.checking {
+  color: #cbd5e0 !important;
+  animation: pulse 2s infinite;
 }
 
-.jellyseerr-connection-status.red {
-  color: #ef4444 !important;
+.jellyseerr-connection-status.available {
+  color: #10b981 !important; /* Green - available to request */
 }
 
-.jellyseerr-connection-status.green {
-  color: #10b981 !important;
+.jellyseerr-connection-status.pending {
+  color: #f59e0b !important; /* Orange - request pending */
+}
+
+.jellyseerr-connection-status.downloading {
+  color: #3b82f6 !important; /* Blue - downloading */
+  animation: pulse 1.5s infinite;
+}
+
+.jellyseerr-connection-status.ready {
+  color: #10b981 !important; /* Green - ready to watch */
+}
+
+.jellyseerr-connection-status.error {
+  color: #ef4444 !important; /* Red - connection/server error */
 }
 
 .jellyseerr-tab-text {

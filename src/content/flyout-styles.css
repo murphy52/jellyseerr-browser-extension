@@ -50,17 +50,31 @@
   opacity: 0.9;
 }
 
-/* Connection status colors for tab icon */
-.jellyseerr-connection-status.grey {
-  color: #9ca3af !important;
+/* Tab status colors - match flyout status colors */
+.jellyseerr-connection-status.checking {
+  color: #cbd5e0 !important;
+  animation: pulse 2s infinite;
 }
 
-.jellyseerr-connection-status.red {
-  color: #ef4444 !important;
+.jellyseerr-connection-status.available {
+  color: #10b981 !important; /* Green - available to request */
 }
 
-.jellyseerr-connection-status.green {
-  color: #10b981 !important;
+.jellyseerr-connection-status.pending {
+  color: #f59e0b !important; /* Orange - request pending */
+}
+
+.jellyseerr-connection-status.downloading {
+  color: #3b82f6 !important; /* Blue - downloading */
+  animation: pulse 1.5s infinite;
+}
+
+.jellyseerr-connection-status.ready {
+  color: #10b981 !important; /* Green - ready to watch */
+}
+
+.jellyseerr-connection-status.error {
+  color: #ef4444 !important; /* Red - connection/server error */
 }
 
 .jellyseerr-tab-text {
