@@ -204,336 +204,90 @@ class IMDBJellyseerrIntegration {
   }
 
   async addJellyseerrButton() {
-    log('Adding Jellyseerr button to IMDB page...');
-    if (this.button) {
-      log('Button reference exists, removing old button and recreating...');
-      // Remove old button and container
-      if (this.button.parentNode) {
-        this.button.parentNode.remove();
-      }
-      this.button = null;
-    }
-
-    // Target lower elements on IMDB page to avoid sidebar interactive elements
-    const insertionPoints = [
-      // PRIMARY: Target sections that are lower on the page
-      '[data-testid="title-details-section"]', // Details section (should be below sidebar)
-      '[data-testid="storyline-plot-summary"]', // Plot summary (main content area)
-      '[data-testid="title-overview-widget"]', // Overview widget
-      
-      // FALLBACK: Original working selectors
-      '[data-testid="title-pc-principal-credit"]', // Principal credits (we know this works)
-      '[data-testid="hero-title-block__metadata"]', // Title metadata area
-      '[data-testid="hero-rating-bar__aggregate-rating"]', // Rating bar area
-      '[data-testid="hero-title-block"]', // Main title block
-      '[data-testid="hero-media"]', // Hero media section
-      
-      // SECONDARY: Rating areas that are typically separate from watchlist
-      '[data-testid="hero-rating-bar"]', // Overall rating bar
-      '[data-testid="title-ratingWidget"]', // Rating widget
-      '[data-testid="hero-rating-bar__user-rating"]', // User rating section
-      
-      // Try to find watchlist PARENT containers instead of watchlist itself
-      '[data-testid="hero-title-block__user-rating"]', // User rating in hero
-      
-      // Content areas (broader selectors)
-      '[data-testid="title-overview-widget"]', // Overview widget
-      '[data-testid="storyline-plot-summary"]', // Plot summary
-      '[data-testid="title-details-section"]', // Details section
-      
-      // Principal credits - fallback
-      '[data-testid="title-pc-principal-credit"]', // Principal credits (creators section)
-      
-      // LAST RESORT: Try watchlist selectors with special handling
-      '[data-testid="tm-box-wl-button"]', // Watchlist button container (with parent targeting)
-      '.ipc-btn--add-to-watchlist', // Add to Watchlist button
-      '.ipc-watchlist-ribbon', // Watchlist ribbon
-      '[class*="watchlist"]', // Any element with watchlist in class name
-      
-      // Page structure fallbacks
-      '.ipc-page-grid', // Page grid
-      '.ipc-page-content-container', // Content container
-      '.titlereference-section-overview', // Legacy overview
-      '.title_wrapper', // Legacy title wrapper
-      'main' // HTML5 main element
-    ];
+    log('Creating Jellyseerr fly-out tab for IMDB page...');
     
-    log('Trying insertion points:', insertionPoints);
-
-    let container = null;
-    for (const selector of insertionPoints) {
-      const element = document.querySelector(selector);
-      log(`Insertion point "${selector}":`, element ? 'found' : 'not found');
-      if (element) {
-        container = element;
-        log('Using insertion point:', selector);
-        
-        // DEBUG: Log container details
-        log('Container details:', {
-          tagName: element.tagName,
-          className: element.className,
-          'data-testid': element.getAttribute('data-testid'),
-          id: element.id,
-          textContent: element.textContent?.substring(0, 50) + '...'
-        });
-        
-        break;
-      }
+    // Remove existing fly-out if it exists
+    const existingFlyout = document.getElementById('jellyseerr-flyout');
+    if (existingFlyout) {
+      existingFlyout.remove();
+    }
+    
+    // Inject flyout CSS if not already present
+    if (!document.getElementById('jellyseerr-flyout-styles')) {
+      const styleElement = document.createElement('style');
+      styleElement.id = 'jellyseerr-flyout-styles';
+      styleElement.textContent = this.getFlyoutCSS();
+      document.head.appendChild(styleElement);
+      log('✅ Flyout CSS injected');
     }
 
-    if (!container) {
-      warn('Could not find suitable container for Jellyseerr button');
-      log('Debugging page layout - URL:', window.location.href);
-      log('Page title:', document.title);
-      
-      // Enhanced debugging - log specific IMDB elements we're looking for
-      const debugSelectors = [
-        // Test our specific selectors
-        '[data-testid*="hero"]', 
-        '[data-testid*="rating"]',
-        '[data-testid*="watchlist"]',
-        '[data-testid*="title"]',
-        '[data-testid*="metadata"]',
-        '.ipc-page-grid',
-        '.ipc-page-content-container',
-        'main'
-      ];
-      
-      log('Testing our insertion point selectors:');
-      debugSelectors.forEach(sel => {
-        const elements = document.querySelectorAll(sel);
-        if (elements.length > 0) {
-          log(`✓ Found ${elements.length} elements matching "${sel}"`);
-          elements.forEach((el, i) => {
-            if (i < 3) { // Only log first 3
-              const testId = el.getAttribute('data-testid');
-              const classes = el.className.split(' ').slice(0, 3).join(' ');
-              log(`  - ${el.tagName.toLowerCase()} ${testId ? `data-testid="${testId}"` : ''} ${classes ? `class="${classes}..."` : ''}`);
-            }
-          });
-        } else {
-          log(`✗ No elements found for "${sel}"`);
-        }
-      });
-      
-      // Try to find ANY reasonable container as emergency fallback
-      const emergencyContainers = ['main', 'body', '.ipc-page-content-container', '#__next'];
-      for (const sel of emergencyContainers) {
-        const emergency = document.querySelector(sel);
-        if (emergency) {
-          warn(`Using emergency container: ${sel}`);
-          container = emergency;
-          break;
-        }
-      }
-      
-      if (!container) {
-        error('No container found at all - cannot insert button');
-        this.button = null;
-        return;
-      }
-    }
-
-    // Create button container with sidebar-appropriate styling
-    const buttonContainer = document.createElement('div');
-    buttonContainer.className = 'jellyseerr-button-container';
-    // Style to match IMDB sidebar elements
-    buttonContainer.style.cssText = `
-      margin: 8px 0 !important;
-      padding: 0 !important;
-      background: none !important;
-      border: none !important;
+    // Create the main fly-out container
+    const flyout = document.createElement('div');
+    flyout.id = 'jellyseerr-flyout';
+    flyout.className = 'jellyseerr-flyout collapsed';
+    
+    // Create the tab (always visible)
+    const tab = document.createElement('div');
+    tab.className = 'jellyseerr-tab';
+    tab.innerHTML = `
+      <svg class="jellyseerr-tab-icon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+      </svg>
+      <span class="jellyseerr-tab-text">Jellyseerr</span>
     `;
-
-    // Create the button - let CSS handle all styling
-    this.button = document.createElement('button');
-    this.button.className = 'jellyseerr-request-button loading';
-    this.button.disabled = true;
     
+    // Create the content panel (expandable)
+    const panel = document.createElement('div');
+    panel.className = 'jellyseerr-panel';
+    
+    // Create status section
+    const statusSection = document.createElement('div');
+    statusSection.className = 'jellyseerr-status-section';
+    statusSection.innerHTML = `
+      <div class="jellyseerr-media-info">
+        <h3 class="jellyseerr-title">${this.mediaData.title}</h3>
+        <p class="jellyseerr-year">${this.mediaData.year} • ${this.mediaData.mediaType === 'tv' ? 'TV Series' : 'Movie'}</p>
+      </div>
+      <div class="jellyseerr-status-indicator">
+        <div class="jellyseerr-status-icon loading"></div>
+        <span class="jellyseerr-status-text">Checking status...</span>
+      </div>
+    `;
+    
+    // Create action button
+    this.button = document.createElement('button');
+    this.button.className = 'jellyseerr-action-button loading';
+    this.button.disabled = true;
     this.button.innerHTML = `
       <svg class="jellyseerr-button-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
       </svg>
       <span>Checking status...</span>
     `;
-
-    // Add button to container first
-    buttonContainer.appendChild(this.button);
-    log('Button element created successfully');
     
-    // Smart insertion logic based on what selector we found
-    const containerTestId = container.getAttribute('data-testid') || '';
-    const containerClass = container.className || '';
-    const usedSelector = insertionPoints[insertionPoints.findIndex(sel => document.querySelector(sel) === container)];
+    // Assemble the panel
+    panel.appendChild(statusSection);
+    panel.appendChild(this.button);
     
-    log('DEBUG: Insertion analysis:', {
-      usedSelector,
-      containerTestId,
-      containerClass,
-      tagName: container.tagName,
-      hasParent: !!container.parentNode
+    // Assemble the flyout
+    flyout.appendChild(tab);
+    flyout.appendChild(panel);
+    
+    // Add click handler for tab
+    tab.addEventListener('click', () => {
+      flyout.classList.toggle('collapsed');
+      flyout.classList.toggle('expanded');
+      log('Flyout toggled:', flyout.classList.contains('expanded') ? 'expanded' : 'collapsed');
     });
     
-    // Check if this is any kind of interactive/button element that we should insert after
-    const isWatchlistSelector = usedSelector && (
-      usedSelector.includes('watchlist') ||
-      usedSelector.includes('wl-button') ||
-      usedSelector.includes('ipc-btn--add-to-watchlist') ||
-      usedSelector.includes('tm-box')
-    );
+    // Add the flyout to the page
+    document.body.appendChild(flyout);
+    log('✅ Jellyseerr flyout added to page');
     
-    const isInteractiveElement = 
-      container.tagName === 'BUTTON' ||
-      containerClass.includes('ipc-btn') ||
-      containerTestId.includes('watchlist') ||
-      containerTestId.includes('rating') ||
-      containerClass.includes('rating');
-    
-    const shouldInsertAfter = isWatchlistSelector || isInteractiveElement;
-    
-    if (shouldInsertAfter && container.parentNode) {
-      log('ATTEMPTING: Insert AFTER element (not inside)');
-      
-      // For watchlist elements, try to find a better parent container to avoid nesting
-      let targetContainer = container;
-      let insertionParent = container.parentNode;
-      
-      if (shouldInsertAfter) {
-        log('Interactive/watchlist element detected - looking for better parent container');
-        
-        // Walk up to find a more appropriate parent (section, div with meaningful class, etc.)
-        let current = container;
-        let attempts = 0;
-        while (current.parentNode && attempts < 4) {
-          const parent = current.parentNode;
-          const parentClass = parent.className || '';
-          const parentTestId = parent.getAttribute('data-testid') || '';
-          
-          log(`Parent ${attempts + 1}:`, {
-            tagName: parent.tagName,
-            className: parentClass.substring(0, 50),
-            'data-testid': parentTestId,
-            hasMultipleChildren: parent.children.length > 1,
-            childrenCount: parent.children.length
-          });
-          
-          // More aggressive criteria for finding a good parent
-          const isGoodParent = (
-            parent.children.length > 1 ||  // Has multiple children
-            parent.tagName === 'SECTION' ||
-            parent.tagName === 'ASIDE' ||
-            parentClass.includes('section') ||
-            parentClass.includes('container') ||
-            parentClass.includes('grid') ||
-            parentClass.includes('page') ||
-            parentTestId.includes('section') ||
-            parentTestId.includes('hero') ||
-            parentTestId.includes('title-block') ||
-            (parentClass.length > 10 && !parentClass.includes('btn')) // Long class names usually indicate containers
-          );
-          
-          if (isGoodParent) {
-            targetContainer = current;
-            insertionParent = parent;
-            log(`✅ Using parent container for insertion:`, {
-              tagName: parent.tagName,
-              className: parentClass.substring(0, 30),
-              'data-testid': parentTestId,
-              reason: 'Found suitable parent container'
-            });
-            break;
-          }
-          
-          current = parent;
-          attempts++;
-        }
-        
-        if (targetContainer === container) {
-          log('⚠️ No better parent found, will use original element');
-        }
-      }
-      
-      try {
-        insertionParent.insertBefore(buttonContainer, targetContainer.nextSibling);
-        log('✅ SUCCESS: Inserted button after element (using parent:', insertionParent.tagName, ')');
-      } catch (e) {
-        log('❌ FAILED to insert after, trying inside original container:', e.message);
-        container.appendChild(buttonContainer);
-      }
-    } else {
-      log('ATTEMPTING: Insert INSIDE element');
-      container.appendChild(buttonContainer);
-      log('✅ SUCCESS: Inserted button inside container');
-    }
-    
-    log('Final placement decision:', {
-      usedSelector,
-      isWatchlistSelector,
-      shouldInsertAfter,
-      actualMethod: shouldInsertAfter ? 'AFTER' : 'INSIDE',
-      parentExists: !!container.parentNode
-    });
-    
-    // Verify button was inserted
-    if (document.contains(this.button)) {
-      log('✅ Button successfully added to DOM!');
-      
-      // Simple visibility check
-      setTimeout(() => {
-        const buttonRect = this.button.getBoundingClientRect();
-        const isVisible = buttonRect.width > 0 && buttonRect.height > 0;
-        
-        if (isVisible) {
-          log('✅ Button is visible!');
-        } else {
-          warn('⚠️ Button not visible, applying emergency styles...');
-        }
-        
-        // ALWAYS apply emergency styles to ensure visibility
-        log('🚨 Applying emergency FIXED POSITION styles to guarantee button is visible...');
-        this.button.style.cssText = `
-          display: block !important;
-          visibility: visible !important;
-          opacity: 1 !important;
-          background: #5B21B6 !important;
-          color: white !important;
-          padding: 15px 25px !important;
-          margin: 0 !important;
-          border: 5px solid yellow !important;
-          border-radius: 8px !important;
-          cursor: pointer !important;
-          font-size: 18px !important;
-          font-weight: bold !important;
-          position: fixed !important;
-          top: 20px !important;
-          right: 20px !important;
-          z-index: 999999 !important;
-          width: auto !important;
-          max-width: 300px !important;
-          box-shadow: 0 0 20px rgba(255, 255, 0, 0.8) !important;
-        `;
-        
-        // Also style the container
-        const container = this.button.parentNode;
-        if (container) {
-          container.style.cssText = `
-            display: block !important;
-            visibility: visible !important;
-            opacity: 1 !important;
-            margin: 20px 0 !important;
-            padding: 10px !important;
-            background: rgba(255, 0, 0, 0.1) !important;
-            border: 2px solid red !important;
-          `;
-        }
-      }, 500);
-      
-    } else {
-      error('❌ Button was not added to DOM despite no errors');
-      this.button = null;
-      return;
-    }
-
+    // Store references
+    this.flyout = flyout;
+    this.statusIcon = statusSection.querySelector('.jellyseerr-status-icon');
+    this.statusText = statusSection.querySelector('.jellyseerr-status-text');
     
     // Add page class for styling
     document.body.classList.add('imdb-page');
@@ -543,6 +297,14 @@ class IMDBJellyseerrIntegration {
       testStatus: () => this.updateButtonWithStatus(),
       testAPI: () => this.debugAPI(),
       mediaData: this.mediaData,
+      expandFlyout: () => {
+        flyout.classList.remove('collapsed');
+        flyout.classList.add('expanded');
+      },
+      collapseFlyout: () => {
+        flyout.classList.remove('expanded');
+        flyout.classList.add('collapsed');
+      },
       getStatus: async () => {
         try {
           const status = await this.getMediaStatus(this.mediaData);
@@ -589,31 +351,45 @@ class IMDBJellyseerrIntegration {
     this.button.disabled = false;
     
     // Update button class and content based on status
-    this.button.className = `jellyseerr-request-button ${statusData.buttonClass || 'request'}`;
+    this.button.className = `jellyseerr-action-button ${statusData.buttonClass || 'request'}`;
     
     let iconPath = 'M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z'; // Default plus icon
+    let statusIconClass = 'available';
+    let statusText = statusData.message || 'Available to request';
     
-    // Choose appropriate icon based on status
+    // Choose appropriate icon and status indicator based on status
     switch (statusData.status) {
       case 'requested':
       case 'pending':
         iconPath = 'M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M7,13H11V7H13V13H17V15H13V21H11V15H7V13Z'; // Clock/pending icon
+        statusIconClass = 'pending';
+        statusText = 'Request pending';
         break;
       case 'downloading':
         iconPath = 'M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z'; // Download icon
+        statusIconClass = 'downloading';
+        statusText = 'Downloading...';
         break;
       case 'available_watch':
       case 'partial':
+        statusIconClass = 'available';
         if (statusData.watchUrl) {
           iconPath = 'M8 5v14l11-7z'; // Play icon
+          statusText = 'Available to watch';
         } else {
           iconPath = 'M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'; // Check icon
+          statusText = 'Available';
         }
         break;
     }
     
-    // Colors are now handled by CSS classes - no inline styling needed
+    // Update status indicator in the flyout
+    if (this.statusIcon && this.statusText) {
+      this.statusIcon.className = `jellyseerr-status-icon ${statusIconClass}`;
+      this.statusText.textContent = statusText;
+    }
     
+    // Update main action button
     this.button.innerHTML = `
       <svg class="jellyseerr-button-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
         <path d="${iconPath}"/>
@@ -643,7 +419,7 @@ class IMDBJellyseerrIntegration {
     // Store status data for later use
     this.statusData = statusData;
     
-    log('Button updated with status:', statusData.status, statusData.buttonText);
+    log('Flyout updated with status:', statusData.status, statusData.buttonText);
   }
   
   async getMediaStatus(mediaData) {
@@ -898,6 +674,304 @@ class IMDBJellyseerrIntegration {
         notification.remove();
       }
     }, 5000);
+  }
+  
+  getFlyoutCSS() {
+    return `
+/* Jellyseerr Flyout Styles - Honey-inspired design */
+
+#jellyseerr-flyout {
+  position: fixed;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 9999;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  max-width: 350px;
+  
+  /* Start collapsed */
+  transform: translateY(-50%) translateX(calc(100% - 60px));
+}
+
+#jellyseerr-flyout.expanded {
+  transform: translateY(-50%) translateX(0);
+}
+
+/* Tab - Always visible part */
+.jellyseerr-tab {
+  position: absolute;
+  left: -60px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 60px;
+  height: 120px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 8px 0 0 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: -2px 0 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s ease;
+  color: white;
+  user-select: none;
+}
+
+.jellyseerr-tab:hover {
+  background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+  transform: translateY(-50%) translateX(-2px);
+  box-shadow: -4px 0 16px rgba(0, 0, 0, 0.2);
+}
+
+.jellyseerr-tab-icon {
+  margin-bottom: 4px;
+  opacity: 0.9;
+}
+
+.jellyseerr-tab-text {
+  font-size: 11px;
+  font-weight: 600;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+/* Panel - Expandable content */
+.jellyseerr-panel {
+  width: 320px;
+  background: white;
+  border-radius: 8px 0 0 8px;
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+}
+
+/* Status Section */
+.jellyseerr-status-section {
+  padding: 20px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.jellyseerr-media-info {
+  margin-bottom: 16px;
+}
+
+.jellyseerr-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a202c;
+  margin: 0 0 4px 0;
+  line-height: 1.3;
+}
+
+.jellyseerr-year {
+  font-size: 14px;
+  color: #64748b;
+  margin: 0;
+  font-weight: 500;
+}
+
+/* Status Indicator */
+.jellyseerr-status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.jellyseerr-status-icon {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  position: relative;
+}
+
+.jellyseerr-status-icon.loading {
+  background: #cbd5e0;
+  animation: pulse 2s infinite;
+}
+
+.jellyseerr-status-icon.available {
+  background: #10b981;
+}
+
+.jellyseerr-status-icon.pending {
+  background: #f59e0b;
+}
+
+.jellyseerr-status-icon.downloading {
+  background: #3b82f6;
+  animation: pulse 1.5s infinite;
+}
+
+.jellyseerr-status-text {
+  font-size: 14px;
+  color: #475569;
+  font-weight: 500;
+}
+
+/* Action Button */
+.jellyseerr-action-button {
+  width: 100%;
+  padding: 14px 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 0 0 0 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.jellyseerr-action-button:hover:not(:disabled) {
+  background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.jellyseerr-action-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.jellyseerr-action-button:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.jellyseerr-action-button.loading {
+  background: #9ca3af;
+  cursor: wait;
+}
+
+.jellyseerr-action-button.success {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.jellyseerr-action-button.error {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+}
+
+.jellyseerr-action-button.request {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.jellyseerr-action-button.watch {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.jellyseerr-button-icon {
+  flex-shrink: 0;
+}
+
+/* Loading Animation */
+.jellyseerr-action-button.loading .jellyseerr-button-icon {
+  animation: spin 1s linear infinite;
+}
+
+/* Animations */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Dark mode support for IMDB's dark theme */
+@media (prefers-color-scheme: dark) {
+  .jellyseerr-panel {
+    background: #1f2937;
+    border-color: #374151;
+  }
+  
+  .jellyseerr-title {
+    color: #f9fafb;
+  }
+  
+  .jellyseerr-year {
+    color: #9ca3af;
+  }
+  
+  .jellyseerr-status-text {
+    color: #d1d5db;
+  }
+  
+  .jellyseerr-status-section {
+    border-bottom-color: #374151;
+  }
+}
+
+/* Responsive behavior */
+@media (max-width: 768px) {
+  #jellyseerr-flyout {
+    transform: translateY(-50%) translateX(calc(100% - 50px));
+    max-width: 300px;
+  }
+  
+  .jellyseerr-tab {
+    left: -50px;
+    width: 50px;
+    height: 100px;
+  }
+  
+  .jellyseerr-panel {
+    width: 280px;
+  }
+  
+  .jellyseerr-tab-text {
+    font-size: 10px;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .jellyseerr-tab {
+    border: 2px solid #000;
+  }
+  
+  .jellyseerr-panel {
+    border: 2px solid #000;
+  }
+  
+  .jellyseerr-action-button {
+    border: 1px solid #000;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  #jellyseerr-flyout,
+  .jellyseerr-tab,
+  .jellyseerr-action-button {
+    transition: none;
+  }
+  
+  .jellyseerr-status-icon.loading,
+  .jellyseerr-status-icon.downloading,
+  .jellyseerr-action-button.loading .jellyseerr-button-icon {
+    animation: none;
+  }
+}
+    `;
   }
 }
 
