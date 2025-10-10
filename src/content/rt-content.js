@@ -529,7 +529,7 @@ class RTJellyseerrIntegration {
     // Start with loading/checking animation on tab
     this.updateTabStatus('checking');
     
-    log('🔧 [NEW VERSION] updateButtonWithStatus called - v1.0.2');
+    log('🔧 [NEW VERSION] updateButtonWithStatus called - v1.0.3 - CACHE BUSTER 12345');
     
     try {
       log('Checking media status...');
