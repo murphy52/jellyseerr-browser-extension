@@ -1,10 +1,13 @@
-// Rotten Tomatoes Content Script for Jellyseerr Integration
+// Rotten Tomatoes Content Script for Jellyseerr Integration v1.0.4
+// CACHE BUSTER: 2024-10-10-v1.0.4-FINAL
 
 // Debug flag - set to true to enable console logging
 const DEBUG = true;
-const log = (...args) => DEBUG && console.log('🍅 [RT]', ...args);
-const warn = (...args) => DEBUG && console.warn('🚨 [RT]', ...args);
-const error = (...args) => console.error('🚨 [RT]', ...args);
+const log = (...args) => DEBUG && console.log('🍅 [RT] v1.0.4', ...args);
+const warn = (...args) => DEBUG && console.warn('🚨 [RT] v1.0.4', ...args);
+const error = (...args) => console.error('🚨 [RT] v1.0.4', ...args);
+
+console.log('🎆 EXTENSION LOADED: Jellyseerr RT Content Script v1.0.4 - TIMESTAMP:', Date.now());
 
 class RTJellyseerrIntegration {
   constructor() {
