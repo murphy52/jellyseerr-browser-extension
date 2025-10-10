@@ -217,25 +217,25 @@ class IMDBIntegration extends BaseIntegration {
         background: #d32f2f !important; /* Red for errors (better contrast than yellow) */
       }
       
-      /* IMDB tab status colors - dark colors for visibility on yellow */
+      /* IMDB tab status colors - black to match tab text on yellow background */
       .jellyseerr-connection-status.available {
-        color: #00d72f !important; /* IMDB green */
+        color: #000000 !important; /* Black like tab text - no color clash */
       }
       
       .jellyseerr-connection-status.pending {
-        color: #ff8800 !important; /* Orange */
+        color: #000000 !important; /* Black like tab text - much better visibility */
       }
       
       .jellyseerr-connection-status.downloading {
-        color: #0078d4 !important; /* Blue */
+        color: #0078d4 !important; /* Keep blue - works well on yellow */
       }
       
       .jellyseerr-connection-status.ready {
-        color: #00d72f !important; /* IMDB green */
+        color: #000000 !important; /* Black like tab text */
       }
       
       .jellyseerr-connection-status.partial {
-        color: #00d72f !important; /* IMDB green */
+        color: #000000 !important; /* Black like tab text */
       }
       
       .jellyseerr-connection-status.error {
