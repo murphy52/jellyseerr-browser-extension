@@ -683,7 +683,7 @@ class IMDBJellyseerrIntegration {
 #jellyseerr-flyout {
   position: fixed;
   right: 0;
-  top: 50%;
+  top: 25%;
   transform: translateY(-50%);
   z-index: 9999;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
