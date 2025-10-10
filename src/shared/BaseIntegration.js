@@ -211,13 +211,19 @@ class BaseIntegration {
       
     } catch (err) {
       this.error('Error updating status:', err);
+      this.log('Error details:', err.message);
       
-      // Handle errors appropriately
+      // Handle errors appropriately - be more specific about error types
       const errorStatus = this.getErrorStatus(err);
+      this.log('Determined error status:', errorStatus);
       
       if (this.uiTheme === 'flyout') {
         this.ui.updateFlyoutStatus(this.uiElements, errorStatus);
-        this.ui.updateTabIcon(this.uiElements.tab, errorStatus.status);
+        
+        // Only update tab icon to error if it's actually a server connection error
+        // Otherwise, default to 'available' status
+        const tabStatus = errorStatus.status === 'error' ? 'error' : 'available';
+        this.ui.updateTabIcon(this.uiElements.tab, tabStatus);
       } else {
         this.ui.updateButtonStatus(this.uiElements.button, errorStatus);
       }
@@ -345,6 +351,28 @@ class BaseIntegration {
         if (this.uiElements.flyout) {
           this.uiElements.flyout.classList.remove('expanded');
           this.uiElements.flyout.classList.add('collapsed');
+        }
+      },
+      testTabIcons: () => {
+        if (!this.uiElements.tab) {
+          console.log('No tab found for icon testing');
+          return;
+        }
+        console.log('Testing all tab icon states...');
+        const states = ['checking', 'available', 'pending', 'downloading', 'ready', 'error'];
+        let i = 0;
+        const cycle = () => {
+          this.ui.updateTabIcon(this.uiElements.tab, states[i]);
+          console.log('Tab icon:', states[i]);
+          i = (i + 1) % states.length;
+          if (i !== 0) setTimeout(cycle, 2000);
+        };
+        cycle();
+      },
+      forceTabStatus: (status) => {
+        if (this.uiElements.tab) {
+          this.ui.updateTabIcon(this.uiElements.tab, status || 'available');
+          console.log('Forced tab icon to:', status || 'available');
         }
       }
     };
