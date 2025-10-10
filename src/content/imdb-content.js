@@ -331,7 +331,7 @@ class IMDBJellyseerrIntegration {
         }
         
         // ALWAYS apply emergency styles to ensure visibility
-        log('🚨 Applying emergency visibility styles to guarantee button is visible...');
+        log('🚨 Applying emergency FIXED POSITION styles to guarantee button is visible...');
         this.button.style.cssText = `
           display: block !important;
           visibility: visible !important;
@@ -339,16 +339,19 @@ class IMDBJellyseerrIntegration {
           background: #5B21B6 !important;
           color: white !important;
           padding: 15px 25px !important;
-          margin: 20px 0 !important;
-          border: 3px solid yellow !important;
+          margin: 0 !important;
+          border: 5px solid yellow !important;
           border-radius: 8px !important;
           cursor: pointer !important;
-          font-size: 16px !important;
+          font-size: 18px !important;
           font-weight: bold !important;
-          position: relative !important;
-          z-index: 9999 !important;
+          position: fixed !important;
+          top: 20px !important;
+          right: 20px !important;
+          z-index: 999999 !important;
           width: auto !important;
           max-width: 300px !important;
+          box-shadow: 0 0 20px rgba(255, 255, 0, 0.8) !important;
         `;
         
         // Also style the container
