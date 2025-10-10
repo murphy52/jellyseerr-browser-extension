@@ -17,6 +17,7 @@ A browser extension that seamlessly integrates with IMDB, Rotten Tomatoes, TheMo
 - 📊 **Trakt Integration**: Purple/pink themed flyout for the movie tracking platform
 - 🔍 **Smart Media Matching**: Advanced search with fallback terms for accurate matching
 - 📊 **Real-time Status**: Shows current request status (Available, Pending, Downloading, etc.)
+- 📺 **Monitoring Indicator**: Shows if TV shows are being monitored for future releases (NEW!)
 - 🏗️ **Modern Architecture**: Built with shared libraries for easy expansion to new sites
 - ⚡ **Fast Performance**: Lightweight and optimized for quick loading
 - 🔧 **Easy Configuration**: Simple setup through extension options

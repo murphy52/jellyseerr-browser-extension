@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **6-Site Support**: Complete coverage of major movie/TV platforms
 - **Comprehensive Testing Framework**: Detailed testing checklist for all integrations
 - **Site Template Documentation**: Templates and guides for adding new integrations
+- **Monitoring Indicator**: Shows if TV shows are being monitored for future releases (Issue #4)
 
 ### 🏗️ Architecture Revolution
 - **BaseIntegration Migration**: All 6 integrations now use unified shared architecture
