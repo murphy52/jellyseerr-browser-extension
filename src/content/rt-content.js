@@ -682,13 +682,18 @@ class RTJellyseerrIntegration {
           
           // Test Jellyseerr server connection
           const serverConnectionTest = await this.testServerConnection();
+          log('🧪 [DEBUG] Server connection test result:', serverConnectionTest);
           if (!serverConnectionTest) {
+            log('🧪 [DEBUG] Server connection FAILED, attempt', attempt, 'of', maxRetries);
             if (attempt < maxRetries) {
               await new Promise(r => setTimeout(r, retryDelay));
               continue;
             } else {
+              log('🧪 [DEBUG] Final attempt failed, throwing error');
               throw new Error('Cannot connect to Jellyseerr server. Please check your server URL and API key in extension settings.');
             }
+          } else {
+            log('🧪 [DEBUG] Server connection SUCCEEDED, proceeding with getMediaStatus');
           }
           
           chrome.runtime.sendMessage({
@@ -847,20 +852,23 @@ class RTJellyseerrIntegration {
   async testServerConnection() {
     return new Promise((resolve) => {
       try {
+        log('🧪 [DEBUG] Starting server connection test...');
         chrome.runtime.sendMessage({ action: 'testConnection' }, (response) => {
+          log('🧪 [DEBUG] Server connection test response:', response);
           if (chrome.runtime.lastError) {
-            log('Server connection test failed:', chrome.runtime.lastError.message);
+            log('🧪 [DEBUG] Server connection test failed - runtime error:', chrome.runtime.lastError.message);
             resolve(false);
           } else if (response && response.success) {
-            log('Server connection test successful:', response.data);
+            log('🧪 [DEBUG] Server connection test SUCCESSFUL - response.success=true, returning true');
             resolve(true);
           } else {
-            log('Server connection test failed:', response ? response.error : 'No response');
+            log('🧪 [DEBUG] Server connection test FAILED - response.success=false, returning false');
+            log('🧪 [DEBUG] Error details:', response ? response.error : 'No response');
             resolve(false);
           }
         });
       } catch (err) {
-        log('Server connection test error:', err);
+        log('🧪 [DEBUG] Server connection test exception:', err);
         resolve(false);
       }
     });
