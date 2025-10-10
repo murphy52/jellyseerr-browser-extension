@@ -669,7 +669,7 @@ class JellyseerrAPI {
         
       case 2: // Pending
         result.status = 'pending';
-        result.message = 'Awaiting approval';
+        result.message = 'Request monitoring';
         result.buttonText = 'Request Pending';
         result.buttonClass = 'pending';
         break;
