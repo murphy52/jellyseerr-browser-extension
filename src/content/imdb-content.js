@@ -214,10 +214,17 @@ class IMDBJellyseerrIntegration {
       this.button = null;
     }
 
-    // Simplified approach - avoid watchlist nesting by targeting broader containers first
+    // Target lower elements on IMDB page to avoid sidebar interactive elements
     const insertionPoints = [
-      // PRIMARY: Hero/metadata areas - avoid watchlist nesting issues
-      '[data-testid="hero-title-block__metadata"]', // Metadata area (try this first)
+      // PRIMARY: Target sections that are lower on the page
+      '[data-testid="title-details-section"]', // Details section (should be below sidebar)
+      '[data-testid="storyline-plot-summary"]', // Plot summary (main content area)
+      '[data-testid="title-overview-widget"]', // Overview widget
+      
+      // FALLBACK: Original working selectors
+      '[data-testid="title-pc-principal-credit"]', // Principal credits (we know this works)
+      '[data-testid="hero-title-block__metadata"]', // Title metadata area
+      '[data-testid="hero-rating-bar__aggregate-rating"]', // Rating bar area
       '[data-testid="hero-title-block"]', // Main title block
       '[data-testid="hero-media"]', // Hero media section
       
@@ -480,19 +487,43 @@ class IMDBJellyseerrIntegration {
           log('✅ Button is visible!');
         } else {
           warn('⚠️ Button not visible, applying emergency styles...');
-          this.button.style.cssText = `
+        }
+        
+        // ALWAYS apply emergency styles to ensure visibility
+        log('🚨 Applying emergency FIXED POSITION styles to guarantee button is visible...');
+        this.button.style.cssText = `
+          display: block !important;
+          visibility: visible !important;
+          opacity: 1 !important;
+          background: #5B21B6 !important;
+          color: white !important;
+          padding: 15px 25px !important;
+          margin: 0 !important;
+          border: 5px solid yellow !important;
+          border-radius: 8px !important;
+          cursor: pointer !important;
+          font-size: 18px !important;
+          font-weight: bold !important;
+          position: fixed !important;
+          top: 20px !important;
+          right: 20px !important;
+          z-index: 999999 !important;
+          width: auto !important;
+          max-width: 300px !important;
+          box-shadow: 0 0 20px rgba(255, 255, 0, 0.8) !important;
+        `;
+        
+        // Also style the container
+        const container = this.button.parentNode;
+        if (container) {
+          container.style.cssText = `
             display: block !important;
             visibility: visible !important;
             opacity: 1 !important;
-            background: #5B21B6 !important;
-            color: white !important;
-            padding: 10px 20px !important;
-            margin: 10px 0 !important;
-            border: none !important;
-            border-radius: 5px !important;
-            cursor: pointer !important;
-            font-size: 14px !important;
-            font-weight: 500 !important;
+            margin: 20px 0 !important;
+            padding: 10px !important;
+            background: rgba(255, 0, 0, 0.1) !important;
+            border: 2px solid red !important;
           `;
         }
       }, 500);
