@@ -114,6 +114,9 @@ class UIComponents {
       case 'available_watch':
         iconPath = 'M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'; // Checkmark
         break;
+      case 'partial':
+        iconPath = 'M8 5v14l11-7z'; // Play icon since content is available to watch
+        break;
       case 'error':
         iconPath = 'M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z'; // X
         break;
@@ -280,6 +283,10 @@ class UIComponents {
       case 'available_watch':
         statusClass = 'jellyseerr-tab-icon jellyseerr-connection-status ready';
         iconPath = 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z';
+        break;
+      case 'partial':
+        statusClass = 'jellyseerr-tab-icon jellyseerr-connection-status partial';
+        iconPath = 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z'; // Checkmark since content is available
         break;
       case 'error':
       default:
@@ -575,6 +582,10 @@ class UIComponents {
         animation: pulse 1.5s infinite;
       }
 
+      .jellyseerr-status-icon.partial {
+        background: #10b981; /* Green since content is partially available */
+      }
+
       .jellyseerr-status-icon.error {
         background: #ef4444;
       }
@@ -636,6 +647,10 @@ class UIComponents {
 
       .jellyseerr-connection-status.ready {
         color: #10b981 !important;
+      }
+
+      .jellyseerr-connection-status.partial {
+        color: #10b981 !important; /* Green like ready/available since content is available */
       }
 
       .jellyseerr-connection-status.error {

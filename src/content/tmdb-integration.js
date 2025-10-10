@@ -6,7 +6,7 @@ console.log('🎬 [TMDb] Integration script loaded!', window.location.href);
 class TMDbIntegration extends BaseIntegration {
   constructor() {
     super('TMDb', {
-      debug: true, // Set to true for debugging
+      debug: false, // Set to true for debugging
       uiTheme: 'flyout', // Use flyout interface like RT
       retryDelay: 2000,
       retryAttempts: 3
