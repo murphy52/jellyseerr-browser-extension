@@ -214,12 +214,17 @@ class IMDBJellyseerrIntegration {
       this.button = null;
     }
 
-    // Modern IMDB insertion points - prioritizing top-of-page locations
+    // Target lower elements on IMDB page to avoid sidebar interactive elements
     const insertionPoints = [
-      // Primary targets - hero section (top of page)
+      // PRIMARY: Target sections that are lower on the page
+      '[data-testid="title-details-section"]', // Details section (should be below sidebar)
+      '[data-testid="storyline-plot-summary"]', // Plot summary (main content area)
+      '[data-testid="title-overview-widget"]', // Overview widget
+      
+      // FALLBACK: Original working selectors
+      '[data-testid="title-pc-principal-credit"]', // Principal credits (we know this works)
       '[data-testid="hero-title-block__metadata"]', // Title metadata area
       '[data-testid="hero-rating-bar__aggregate-rating"]', // Rating bar area
-      '[data-testid="title-pc-principal-credit"]', // Principal credits (directors/stars)
       '[data-testid="hero-title-block"]', // Main title block
       
       // Secondary targets - above-the-fold content
