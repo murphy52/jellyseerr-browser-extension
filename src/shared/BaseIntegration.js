@@ -209,7 +209,7 @@ class BaseIntegration {
       // Update UI based on theme
       if (this.uiTheme === 'flyout') {
         this.ui.updateFlyoutStatus(this.uiElements, statusData);
-        this.ui.updateTabIcon(this.uiElements.tab, statusData.status);
+        this.ui.updateTabIcon(this.uiElements.tab, statusData.status, statusData);
       } else {
         this.ui.updateButtonStatus(this.uiElements.button, statusData);
       }
@@ -228,7 +228,7 @@ class BaseIntegration {
         // Only update tab icon to error if it's actually a server connection error
         // Otherwise, default to 'available' status
         const tabStatus = errorStatus.status === 'error' ? 'error' : 'available';
-        this.ui.updateTabIcon(this.uiElements.tab, tabStatus);
+        this.ui.updateTabIcon(this.uiElements.tab, tabStatus, errorStatus);
       } else {
         this.ui.updateButtonStatus(this.uiElements.button, errorStatus);
       }

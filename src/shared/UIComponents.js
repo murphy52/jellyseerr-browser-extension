@@ -246,7 +246,15 @@ class UIComponents {
     // Update status indicator
     if (statusIcon && statusText) {
       statusIcon.className = `jellyseerr-status-icon ${statusData.status || 'loading'}`;
-      statusText.textContent = statusData.message || 'Connecting to Jellyseerr...';
+      
+      // Add monitoring indicator if available (Issue #4)
+      let statusMessage = statusData.message || 'Connecting to Jellyseerr...';
+      if (statusData.monitoring && statusData.monitoring.message) {
+        statusMessage = `${statusData.monitoring.indicator} ${statusData.monitoring.message}`;
+        this.log('Added monitoring indicator:', statusData.monitoring);
+      }
+      
+      statusText.textContent = statusMessage;
     }
     
     // Update action button
@@ -258,11 +266,12 @@ class UIComponents {
   }
 
   /**
-   * Update flyout tab icon based on connection status
+   * Update flyout tab icon based on connection status and optionally set tooltip
    * @param {HTMLElement} tab - Tab element
    * @param {string} status - Status: 'checking', 'available', 'pending', 'downloading', 'ready', 'error'
+   * @param {Object} statusData - Optional status data with tooltip info
    */
-  updateTabIcon(tab, status) {
+  updateTabIcon(tab, status, statusData = null) {
     const iconElement = tab.querySelector('.jellyseerr-connection-status');
     const pathElement = tab.querySelector('.jellyseerr-icon-path');
     
@@ -307,6 +316,17 @@ class UIComponents {
     
     iconElement.setAttribute('class', statusClass);
     pathElement.setAttribute('d', iconPath);
+    
+    // Update tooltip with status message and monitoring info (Issue #4)
+    if (statusData) {
+      let tooltipText = statusData.message || `Jellyseerr - ${status}`;
+      if (statusData.monitoring && statusData.monitoring.message) {
+        tooltipText += ` ${statusData.monitoring.indicator} ${statusData.monitoring.message}`;
+        this.log('Added monitoring indicator to tab tooltip:', statusData.monitoring);
+      }
+      tab.title = tooltipText;
+    }
+    
     this.log('Tab icon updated to status:', status);
   }
 

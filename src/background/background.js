@@ -560,12 +560,28 @@ class JellyseerrAPI {
     console.log('📊 [Background] mediaDetails.media:', mediaDetails.media ? {
       status: mediaDetails.media.status,
       tmdbId: mediaDetails.media.tmdbId,
-      mediaUrl: mediaDetails.media.mediaUrl ? '[HAS_URL]' : null
+      mediaUrl: mediaDetails.media.mediaUrl ? '[HAS_URL]' : null,
+      // Additional monitoring info for Issue #4
+      seasons: mediaDetails.media.seasons ? mediaDetails.media.seasons.length : null,
+      episodeCount: mediaDetails.media.episodeCount,
+      inProduction: mediaDetails.media.inProduction,
+      firstAirDate: mediaDetails.media.firstAirDate,
+      lastAirDate: mediaDetails.media.lastAirDate,
+      status: mediaDetails.media.status
     } : null);
     console.log('📊 [Background] mediaDetails.mediaInfo:', mediaDetails.mediaInfo ? {
-      status: mediaDetails.mediaInfo.status
+      status: mediaDetails.mediaInfo.status,
+      // Check for additional monitoring flags
+      inProduction: mediaDetails.mediaInfo.inProduction,
+      seasons: mediaDetails.mediaInfo.seasons
     } : null);
     console.log('📊 [Background] mediaDetails.requests:', mediaDetails.requests ? mediaDetails.requests.length + ' requests' : null);
+    
+    // Log additional fields that might indicate monitoring (Issue #4 investigation)
+    console.log('📊 [Background] Full object keys for monitoring detection:', Object.keys(mediaDetails));
+    if (mediaDetails.seasons) {
+      console.log('📊 [Background] Seasons data available:', mediaDetails.seasons.length);
+    }
     
     // Special debug for IT: Welcome to Derry (TMDB ID 200875)
     const tmdbId = mediaDetails.tmdbId || mediaDetails.id || (mediaDetails.media && mediaDetails.media.tmdbId);
@@ -716,8 +732,70 @@ class JellyseerrAPI {
         break;
     }
     
+    // Add monitoring indicator for Issue #4
+    const monitoringInfo = this.detectMonitoringStatus(mediaDetails, mediaType);
+    if (monitoringInfo) {
+      result.monitoring = monitoringInfo;
+      console.log('📊 [Background] Monitoring info:', monitoringInfo);
+    }
+    
     console.log('📊 [Background] Formatted status:', result);
     return result;
+  }
+  
+  /**
+   * Detect if media is being monitored for future releases (Issue #4)
+   * @param {Object} mediaDetails - Raw media details from Jellyseerr
+   * @param {string} mediaType - 'movie' or 'tv'
+   * @returns {Object|null} Monitoring information or null
+   */
+  detectMonitoringStatus(mediaDetails, mediaType) {
+    if (!mediaDetails) return null;
+    
+    // For TV shows, check if monitoring future seasons/episodes
+    if (mediaType === 'tv') {
+      const media = mediaDetails.media || mediaDetails.mediaInfo || mediaDetails;
+      
+      // Check if show is still in production
+      if (media.inProduction === true) {
+        return {
+          type: 'future_episodes',
+          message: 'Monitoring new episodes',
+          indicator: '📡'
+        };
+      }
+      
+      // Check if there are incomplete seasons being monitored
+      if (media.seasons && Array.isArray(media.seasons)) {
+        const incompleteSeasons = media.seasons.filter(season => 
+          season.status !== 5 // Not fully available
+        );
+        
+        if (incompleteSeasons.length > 0) {
+          return {
+            type: 'future_seasons',
+            message: `Monitoring ${incompleteSeasons.length} season(s)`,
+            indicator: '📡'
+          };
+        }
+      }
+    }
+    
+    // For movies, less common but could monitor for sequels/collections
+    if (mediaType === 'movie') {
+      const media = mediaDetails.media || mediaDetails.mediaInfo || mediaDetails;
+      
+      // Check if part of a collection that might have future releases
+      if (media.belongsToCollection && media.inProduction) {
+        return {
+          type: 'future_collection',
+          message: 'Monitoring collection',
+          indicator: '📡'
+        };
+      }
+    }
+    
+    return null;
   }
   
   getJellyfinConfig() {
