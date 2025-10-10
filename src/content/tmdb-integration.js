@@ -219,7 +219,7 @@ class TMDbIntegration extends BaseIntegration {
       }
       
       .jellyseerr-connection-status.error {
-        color: #ffcccc !important; /* Light red - visible but distinct */
+        color: #ff6b6b !important; /* Bright red - clear error indication */
       }
       
       .jellyseerr-connection-status.partial {
