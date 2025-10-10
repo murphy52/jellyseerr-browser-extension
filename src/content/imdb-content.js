@@ -349,26 +349,56 @@ class IMDBJellyseerrIntegration {
     
     // Smart insertion logic based on container type
     const containerTestId = container.getAttribute('data-testid');
-    const containerClass = container.className;
+    const containerClass = container.className || '';
     
-    if (containerTestId && (
-        containerTestId.includes('rating') || 
+    // Check if this is a watchlist button or similar interactive element
+    const isWatchlistButton = (
+      containerClass.includes('watchlist') ||
+      containerClass.includes('wl-button') ||
+      containerTestId && (
         containerTestId.includes('watchlist') ||
+        containerTestId.includes('wl-button') ||
+        containerTestId.includes('tm-box')
+      ) ||
+      container.tagName === 'BUTTON' ||
+      container.classList.contains('ipc-btn')
+    );
+    
+    const isRatingElement = (
+      containerTestId && (
+        containerTestId.includes('rating') ||
         containerTestId.includes('user-rating')
-    )) {
-      // For rating/watchlist areas, insert after the container to stay in sidebar
+      )
+    );
+    
+    if (isWatchlistButton || isRatingElement) {
+      // For interactive elements (buttons, ratings), insert AFTER the element to stay in same area
       if (container.parentNode) {
         container.parentNode.insertBefore(buttonContainer, container.nextSibling);
-        log('Inserted button after rating/watchlist element in sidebar');
+        log('Inserted button after interactive element (watchlist/rating)');
       } else {
-        container.appendChild(buttonContainer);
+        // Fallback: try to find the parent container
+        const parentContainer = container.closest('[data-testid], .ipc-page-section, section, div');
+        if (parentContainer && parentContainer !== container) {
+          parentContainer.appendChild(buttonContainer);
+          log('Inserted button in parent container as fallback');
+        } else {
+          container.appendChild(buttonContainer);
+          log('Inserted button inside element as last resort');
+        }
       }
     } else {
-      // For other containers, append inside
+      // For other containers (metadata, content areas), append inside
       container.appendChild(buttonContainer);
+      log('Inserted button inside container');
     }
     
-    log('Button container added to:', containerTestId || containerClass || container.tagName);
+    log('Button container placement:', {
+      container: containerTestId || containerClass || container.tagName,
+      isWatchlistButton,
+      isRatingElement,
+      method: isWatchlistButton || isRatingElement ? 'after' : 'inside'
+    });
     
     // Verify button was inserted
     if (document.contains(this.button)) {
