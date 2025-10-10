@@ -214,32 +214,26 @@ class IMDBJellyseerrIntegration {
       this.button = null;
     }
 
-    // Modern IMDB insertion points - prioritizing top-of-page locations
+    // Target IMDB right sidebar area - where interactive elements belong
     const insertionPoints = [
-      // Primary targets - hero section (top of page)
+      // PRIMARY: Right sidebar - where "Add to Watchlist", ratings, etc. are located
+      '[data-testid="hero-rating-bar__user-rating"]', // User rating section in sidebar
+      '[data-testid="hero-rating-bar__watchlist"]', // Watchlist button area
+      '[data-testid="title-ratingWidget"]', // Rating widget area
+      
+      // Secondary: Other right sidebar elements
+      '[data-testid="hero-title-block__user-rating"]', // User rating in hero block
+      '.ipc-watchlist-ribbon', // Watchlist ribbon element
+      
+      // Tertiary: General sidebar areas
+      '[data-testid="hero-rating-bar"]', // Rating bar section
       '[data-testid="hero-title-block__metadata"]', // Title metadata area
-      '[data-testid="hero-rating-bar__aggregate-rating"]', // Rating bar area
-      '[data-testid="title-pc-principal-credit"]', // Principal credits (directors/stars)
-      '[data-testid="hero-title-block"]', // Main title block
       
-      // Secondary targets - above-the-fold content
+      // Fallback: Main content areas (less ideal)
       '[data-testid="title-overview-widget"]', // Overview widget
-      '[data-testid="storyline-plot-summary"]', // Plot summary (if near top)
-      
-      // Watch options (if they exist near top)
-      '[data-testid="title-details-streamer"]', // Streaming services container
-      '[data-testid="title-details-watch-options"]', // Watch options
-      
-      // Fallback targets - page structure
+      '[data-testid="title-details-section"]', // Details section
       '.ipc-page-grid', // Page grid container
-      '.ipc-page-content-container', // Main content container
-      
-      // Legacy selectors (for older IMDB versions)
-      '.titleBar-content',
-      '.title_wrapper',
-      
-      // Last resort - details section (we know this works but it's far down)
-      '[data-testid="title-details-section"]' // Main details section (moved to last)
+      '.ipc-page-content-container' // Main content container
     ];
     
     log('Trying insertion points:', insertionPoints);
@@ -286,9 +280,16 @@ class IMDBJellyseerrIntegration {
       return;
     }
 
-    // Create button container - let CSS handle styling
+    // Create button container with sidebar-appropriate styling
     const buttonContainer = document.createElement('div');
     buttonContainer.className = 'jellyseerr-button-container';
+    // Style to match IMDB sidebar elements
+    buttonContainer.style.cssText = `
+      margin: 8px 0 !important;
+      padding: 0 !important;
+      background: none !important;
+      border: none !important;
+    `;
 
     // Create the button - let CSS handle all styling
     this.button = document.createElement('button');
@@ -306,9 +307,28 @@ class IMDBJellyseerrIntegration {
     buttonContainer.appendChild(this.button);
     log('Button element created successfully');
     
-    // Simple insertion - just append to the found container
-    container.appendChild(buttonContainer);
-    log('Button container added to:', container.getAttribute('data-testid') || container.className || container.tagName);
+    // Smart insertion logic based on container type
+    const containerTestId = container.getAttribute('data-testid');
+    const containerClass = container.className;
+    
+    if (containerTestId && (
+        containerTestId.includes('rating') || 
+        containerTestId.includes('watchlist') ||
+        containerTestId.includes('user-rating')
+    )) {
+      // For rating/watchlist areas, insert after the container to stay in sidebar
+      if (container.parentNode) {
+        container.parentNode.insertBefore(buttonContainer, container.nextSibling);
+        log('Inserted button after rating/watchlist element in sidebar');
+      } else {
+        container.appendChild(buttonContainer);
+      }
+    } else {
+      // For other containers, append inside
+      container.appendChild(buttonContainer);
+    }
+    
+    log('Button container added to:', containerTestId || containerClass || container.tagName);
     
     // Verify button was inserted
     if (document.contains(this.button)) {
