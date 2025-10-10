@@ -44,8 +44,8 @@ class RTJellyseerrIntegration {
       } else {
         log('No media data found');
       }
-    } catch (error) {
-      error('Error extracting Rotten Tomatoes media data:', error);
+    } catch (err) {
+      error('Error extracting Rotten Tomatoes media data:', err);
     }
   }
 
@@ -382,9 +382,9 @@ class RTJellyseerrIntegration {
           });
           console.log('🔧 [Debug] Search debug result:', result);
           return result;
-        } catch (error) {
-          console.error('🔧 [Debug] Failed to debug search:', error);
-          return error;
+        } catch (err) {
+          console.error('🔧 [Debug] Failed to debug search:', err);
+          return err;
         }
       },
       getStatus: async () => {
@@ -392,9 +392,9 @@ class RTJellyseerrIntegration {
           const status = await this.getMediaStatus(this.mediaData);
           console.log('🔧 [Debug] Raw status from API:', status);
           return status;
-        } catch (error) {
-          console.error('🔧 [Debug] Failed to get status:', error);
-          return error;
+        } catch (err) {
+          console.error('🔧 [Debug] Failed to get status:', err);
+          return err;
         }
       }
     };
@@ -458,8 +458,8 @@ class RTJellyseerrIntegration {
         await this.updateButtonWithStatus();
       }, 2000);
 
-    } catch (error) {
-      console.error('Error sending request to Jellyseerr:', error);
+    } catch (err) {
+      console.error('Error sending request to Jellyseerr:', err);
       
       this.button.classList.remove('loading');
       this.button.classList.add('error');
@@ -473,7 +473,7 @@ class RTJellyseerrIntegration {
 
       this.showNotification(
         'Request Failed', 
-        error.message || 'Failed to send request to Jellyseerr',
+        err.message || 'Failed to send request to Jellyseerr',
         'error'
       );
 
@@ -538,20 +538,20 @@ class RTJellyseerrIntegration {
       this.updateButtonAppearance(statusData);
       this.updateTabStatus(statusData.status);
       
-    } catch (error) {
-      error('Error checking media status:', error);
+    } catch (err) {
+      error('Error checking media status:', err);
       
       // Check if this is a connection/server error
-      const isServerError = error.message && (
-        error.message.includes('connect') || 
-        error.message.includes('Receiving end does not exist') ||
-        error.message.includes('Server URL and API key') ||
-        error.message.includes('Connection failed') ||
-        error.message.includes('fetch') ||
-        error.message.includes('network') ||
-        error.message.includes('timeout') ||
-        error.message.toLowerCase().includes('cors') ||
-        error.message.includes('required')
+      const isServerError = err.message && (
+        err.message.includes('connect') || 
+        err.message.includes('Receiving end does not exist') ||
+        err.message.includes('Server URL and API key') ||
+        err.message.includes('Connection failed') ||
+        err.message.includes('fetch') ||
+        err.message.includes('network') ||
+        err.message.includes('timeout') ||
+        err.message.toLowerCase().includes('cors') ||
+        err.message.includes('required')
       );
       
       if (isServerError) {
@@ -749,8 +749,8 @@ class RTJellyseerrIntegration {
       }
       
       return result;
-    } catch (error) {
-      error('🛠️ API debug failed:', error);
+    } catch (err) {
+      error('🛠️ API debug failed:', err);
       return null;
     }
   }
@@ -831,8 +831,8 @@ class RTJellyseerrIntegration {
             resolve(true);
           }
         });
-      } catch (error) {
-        log('Extension connection test error:', error);
+      } catch (err) {
+        log('Extension connection test error:', err);
         resolve(false);
       }
     });
@@ -853,8 +853,8 @@ class RTJellyseerrIntegration {
             resolve(false);
           }
         });
-      } catch (error) {
-        log('Server connection test error:', error);
+      } catch (err) {
+        log('Server connection test error:', err);
         resolve(false);
       }
     });
