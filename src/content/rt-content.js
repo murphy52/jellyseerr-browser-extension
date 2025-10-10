@@ -515,22 +515,38 @@ class RTJellyseerrIntegration {
     } catch (error) {
       error('Error checking media status:', error);
       
-      // Check if this is a connection error
-      if (error.message && (error.message.includes('connect') || error.message.includes('Receiving end does not exist'))) {
-        // Connection/server error - show error state on tab
-        this.updateTabStatus('error');
-      } else {
-        // Other error - assume available
-        this.updateTabStatus('available');
-      }
+      // Check if this is a connection/server error
+      const isServerError = error.message && (
+        error.message.includes('connect') || 
+        error.message.includes('Receiving end does not exist') ||
+        error.message.includes('Server URL and API key') ||
+        error.message.includes('Connection failed') ||
+        error.message.includes('fetch') ||
+        error.message.includes('network') ||
+        error.message.includes('timeout') ||
+        error.message.toLowerCase().includes('cors') ||
+        error.message.includes('required')
+      );
       
-      // Fall back to default request button in flyout
-      this.updateButtonAppearance({
-        status: 'available',
-        buttonText: 'Request on Jellyseerr',
-        buttonClass: 'request',
-        message: 'Not requested'
-      });
+      if (isServerError) {
+        // Server/configuration error - show error state
+        this.updateTabStatus('error');
+        this.updateButtonAppearance({
+          status: 'error',
+          buttonText: 'Server Error',
+          buttonClass: 'error',
+          message: 'Cannot connect to Jellyseerr server'
+        });
+      } else {
+        // Other error - assume media is available to request
+        this.updateTabStatus('available');
+        this.updateButtonAppearance({
+          status: 'available',
+          buttonText: 'Request on Jellyseerr',
+          buttonClass: 'request',
+          message: 'Not requested'
+        });
+      }
     }
   }
   
@@ -571,6 +587,11 @@ class RTJellyseerrIntegration {
           iconPath = 'M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'; // Check icon
           statusText = 'Available';
         }
+        break;
+      case 'error':
+        iconPath = 'M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z'; // X icon
+        statusIconClass = 'error';
+        statusText = statusData.message || 'Server error';
         break;
     }
     
@@ -957,6 +978,10 @@ class RTJellyseerrIntegration {
 .jellyseerr-status-icon.downloading {
   background: #3b82f6;
   animation: pulse 1.5s infinite;
+}
+
+.jellyseerr-status-icon.error {
+  background: #ef4444;
 }
 
 .jellyseerr-status-text {

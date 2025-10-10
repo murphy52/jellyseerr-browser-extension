@@ -153,6 +153,10 @@
   animation: pulse 1.5s infinite;
 }
 
+.jellyseerr-status-icon.error {
+  background: #ef4444;
+}
+
 .jellyseerr-status-text {
   font-size: 14px;
   color: #475569;
