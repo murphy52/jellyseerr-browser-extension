@@ -192,6 +192,60 @@ class MetacriticIntegration extends BaseIntegration {
         border-color: #ff9900 !important;
         box-shadow: 0 4px 12px rgba(255, 204, 51, 0.3) !important;
       }
+      
+      /* Metacritic-specific status colors - optimized for yellow theme */
+      .jellyseerr-status-icon.available {
+        background: #389e0d !important; /* Dark green for contrast on yellow */
+      }
+      
+      .jellyseerr-status-icon.pending {
+        background: #d46b08 !important; /* Dark orange */
+      }
+      
+      .jellyseerr-status-icon.downloading {
+        background: #1d39c4 !important; /* Dark blue for contrast */
+      }
+      
+      .jellyseerr-status-icon.ready {
+        background: #389e0d !important; /* Dark green */
+      }
+      
+      .jellyseerr-status-icon.partial {
+        background: #389e0d !important; /* Dark green */
+      }
+      
+      .jellyseerr-status-icon.error {
+        background: #cf1322 !important; /* Dark red for contrast */
+      }
+      
+      /* Metacritic tab status colors - dark colors for visibility on yellow */
+      .jellyseerr-connection-status.available {
+        color: #389e0d !important; /* Dark green */
+      }
+      
+      .jellyseerr-connection-status.pending {
+        color: #d46b08 !important; /* Dark orange */
+      }
+      
+      .jellyseerr-connection-status.downloading {
+        color: #1d39c4 !important; /* Dark blue */
+      }
+      
+      .jellyseerr-connection-status.ready {
+        color: #389e0d !important; /* Dark green */
+      }
+      
+      .jellyseerr-connection-status.partial {
+        color: #389e0d !important; /* Dark green */
+      }
+      
+      .jellyseerr-connection-status.error {
+        color: #cf1322 !important; /* Dark red */
+      }
+      
+      .jellyseerr-connection-status.checking {
+        color: #595959 !important; /* Dark gray for loading on yellow */
+      }
     `;
   }
 }

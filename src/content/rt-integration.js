@@ -210,8 +210,41 @@ class RottenTomatoesIntegration extends BaseIntegration {
         background: #ff8800 !important; /* RT orange */
       }
       
+      .jellyseerr-status-icon.downloading {
+        background: #3478c1 !important; /* RT blue for downloading */
+      }
+      
       .jellyseerr-status-icon.error {
         background: #fa320a !important; /* RT red for errors */
+      }
+      
+      /* RT tab status colors - optimized for red theme visibility */
+      .jellyseerr-connection-status.available {
+        color: #3478c1 !important; /* RT blue for available */
+      }
+      
+      .jellyseerr-connection-status.pending {
+        color: #ff8800 !important; /* RT orange for pending */
+      }
+      
+      .jellyseerr-connection-status.downloading {
+        color: #3478c1 !important; /* RT blue for downloading */
+      }
+      
+      .jellyseerr-connection-status.ready {
+        color: #3478c1 !important; /* RT blue for ready */
+      }
+      
+      .jellyseerr-connection-status.partial {
+        color: #3478c1 !important; /* RT blue for partial */
+      }
+      
+      .jellyseerr-connection-status.error {
+        color: #ffffff !important; /* White for visibility on red */
+      }
+      
+      .jellyseerr-connection-status.checking {
+        color: #ffffff !important; /* White for loading on red */
       }
       
       /* Use RT's blue CTA color for available/ready states */

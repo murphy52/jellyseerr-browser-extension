@@ -179,6 +179,60 @@ class LetterboxdIntegration extends BaseIntegration {
         border-color: #00b82e !important;
         box-shadow: 0 4px 12px rgba(0, 215, 53, 0.3) !important;
       }
+      
+      /* Letterboxd-specific status colors - optimized for green theme */
+      .jellyseerr-status-icon.available {
+        background: #52c41a !important; /* Bright green (similar but distinct) */
+      }
+      
+      .jellyseerr-status-icon.pending {
+        background: #fa8c16 !important; /* Orange for contrast */
+      }
+      
+      .jellyseerr-status-icon.downloading {
+        background: #1890ff !important; /* Blue for contrast */
+      }
+      
+      .jellyseerr-status-icon.ready {
+        background: #52c41a !important; /* Bright green */
+      }
+      
+      .jellyseerr-status-icon.partial {
+        background: #52c41a !important; /* Bright green */
+      }
+      
+      .jellyseerr-status-icon.error {
+        background: #ff4d4f !important; /* Red for contrast */
+      }
+      
+      /* Letterboxd tab status colors - contrasting colors for green theme */
+      .jellyseerr-connection-status.available {
+        color: #ffffff !important; /* White for visibility on green */
+      }
+      
+      .jellyseerr-connection-status.pending {
+        color: #fa8c16 !important; /* Orange */
+      }
+      
+      .jellyseerr-connection-status.downloading {
+        color: #1890ff !important; /* Blue */
+      }
+      
+      .jellyseerr-connection-status.ready {
+        color: #ffffff !important; /* White */
+      }
+      
+      .jellyseerr-connection-status.partial {
+        color: #ffffff !important; /* White */
+      }
+      
+      .jellyseerr-connection-status.error {
+        color: #ff4d4f !important; /* Red */
+      }
+      
+      .jellyseerr-connection-status.checking {
+        color: #d9d9d9 !important; /* Light gray for loading */
+      }
     `;
   }
 }

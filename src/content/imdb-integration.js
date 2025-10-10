@@ -192,7 +192,7 @@ class IMDBIntegration extends BaseIntegration {
         box-shadow: 0 4px 12px rgba(245, 197, 24, 0.3) !important;
       }
       
-      /* IMDB-specific status colors */
+      /* IMDB-specific status colors - optimized for yellow theme */
       .jellyseerr-status-icon.available {
         background: #00d72f !important; /* IMDB green for available content */
       }
@@ -201,8 +201,49 @@ class IMDBIntegration extends BaseIntegration {
         background: #ff8800 !important; /* Orange for pending */
       }
       
+      .jellyseerr-status-icon.downloading {
+        background: #0078d4 !important; /* Blue for downloading */
+      }
+      
+      .jellyseerr-status-icon.ready {
+        background: #00d72f !important; /* IMDB green for ready */
+      }
+      
+      .jellyseerr-status-icon.partial {
+        background: #00d72f !important; /* IMDB green for partial */
+      }
+      
       .jellyseerr-status-icon.error {
-        background: #f5c518 !important; /* IMDB yellow for errors */
+        background: #d32f2f !important; /* Red for errors (better contrast than yellow) */
+      }
+      
+      /* IMDB tab status colors - dark colors for visibility on yellow */
+      .jellyseerr-connection-status.available {
+        color: #00d72f !important; /* IMDB green */
+      }
+      
+      .jellyseerr-connection-status.pending {
+        color: #ff8800 !important; /* Orange */
+      }
+      
+      .jellyseerr-connection-status.downloading {
+        color: #0078d4 !important; /* Blue */
+      }
+      
+      .jellyseerr-connection-status.ready {
+        color: #00d72f !important; /* IMDB green */
+      }
+      
+      .jellyseerr-connection-status.partial {
+        color: #00d72f !important; /* IMDB green */
+      }
+      
+      .jellyseerr-connection-status.error {
+        color: #d32f2f !important; /* Red for visibility */
+      }
+      
+      .jellyseerr-connection-status.checking {
+        color: #666666 !important; /* Dark gray for loading on yellow */
       }
     `;
   }

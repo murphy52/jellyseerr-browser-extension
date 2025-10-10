@@ -253,8 +253,45 @@ class TraktIntegration extends BaseIntegration {
         background: #fa8c16 !important; /* Orange for pending */
       }
       
+      .jellyseerr-status-icon.downloading {
+        background: #1890ff !important; /* Blue for downloading */
+      }
+      
       .jellyseerr-status-icon.error {
         background: #ed1c24 !important; /* Trakt red for errors */
+      }
+      
+      .jellyseerr-status-icon.partial {
+        background: #52c41a !important; /* Green like available */
+      }
+      
+      /* Trakt tab status colors - optimized for red/purple theme visibility */
+      .jellyseerr-connection-status.available {
+        color: #52c41a !important; /* Bright green */
+      }
+      
+      .jellyseerr-connection-status.pending {
+        color: #fa8c16 !important; /* Orange */
+      }
+      
+      .jellyseerr-connection-status.downloading {
+        color: #1890ff !important; /* Blue */
+      }
+      
+      .jellyseerr-connection-status.ready {
+        color: #52c41a !important; /* Bright green */
+      }
+      
+      .jellyseerr-connection-status.partial {
+        color: #52c41a !important; /* Bright green */
+      }
+      
+      .jellyseerr-connection-status.error {
+        color: #ff4d4f !important; /* Bright red for visibility on dark bg */
+      }
+      
+      .jellyseerr-connection-status.checking {
+        color: #d9d9d9 !important; /* Light gray for loading */
       }
       
       /* Special styling for Trakt's dark theme */
