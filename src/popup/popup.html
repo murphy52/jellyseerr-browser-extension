@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jellyseerr Request Button</title>
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <div class="popup-container">
+        <header class="popup-header">
+            <div class="logo">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                    <path d="M12 6v6l4 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                <h1>Jellyseerr</h1>
+            </div>
+            <div class="status-indicator" id="statusIndicator">
+                <div class="status-dot"></div>
+                <span class="status-text">Checking...</span>
+            </div>
+        </header>
+
+        <main class="popup-main">
+            <div id="configuredState" class="state-content hidden">
+                <div class="info-section">
+                    <h3>Extension Active</h3>
+                    <p>The Jellyseerr request button will appear on IMDB and Rotten Tomatoes pages.</p>
+                </div>
+                
+                <div class="stats" id="statsSection">
+                    <div class="stat-item">
+                        <span class="stat-label">Server:</span>
+                        <span class="stat-value" id="serverUrl">Loading...</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="notConfiguredState" class="state-content hidden">
+                <div class="info-section">
+                    <div class="warning-icon">⚠️</div>
+                    <h3>Setup Required</h3>
+                    <p>Configure your Jellyseerr server URL and API key to start using the extension.</p>
+                </div>
+            </div>
+
+            <div id="errorState" class="state-content hidden">
+                <div class="info-section">
+                    <div class="error-icon">❌</div>
+                    <h3>Connection Error</h3>
+                    <p id="errorMessage">Unable to connect to your Jellyseerr server.</p>
+                </div>
+            </div>
+        </main>
+
+        <footer class="popup-footer">
+            <div class="button-group">
+                <button id="openOptions" class="button secondary">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+                        <path d="M12 1v6M12 17v6M4.22 4.22l4.24 4.24M15.54 15.54l4.24 4.24M1 12h6M17 12h6M4.22 19.78l4.24-4.24M15.54 8.46l4.24-4.24" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                    Settings
+                </button>
+                
+                <button id="testConnection" class="button primary hidden">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <polyline points="22,12 18,12 15,21 9,3 6,12 2,12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Test Connection
+                </button>
+            </div>
+        </footer>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html>

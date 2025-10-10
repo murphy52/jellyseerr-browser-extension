@@ -1,0 +1,60 @@
+{
+  "manifest_version": 3,
+  "name": "Jellyseerr Request Button",
+  "version": "1.0.1",
+  "description": "Add movies and TV shows to Jellyseerr directly from IMDB and Rotten Tomatoes",
+  "permissions": [
+    "storage",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "https://www.imdb.com/*",
+    "https://imdb.com/*",
+    "https://www.rottentomatoes.com/*",
+    "https://rottentomatoes.com/*",
+    "http://localhost/*",
+    "https://*/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.imdb.com/title/*",
+        "https://imdb.com/title/*"
+      ],
+      "js": ["src/content/imdb-content.js"],
+      "css": ["src/content/content-styles.css"],
+      "run_at": "document_end"
+    },
+    {
+      "matches": [
+        "https://www.rottentomatoes.com/m/*",
+        "https://rottentomatoes.com/m/*",
+        "https://www.rottentomatoes.com/tv/*",
+        "https://rottentomatoes.com/tv/*"
+      ],
+      "js": ["src/content/rt-content.js"],
+      "css": ["src/content/content-styles.css"],
+      "run_at": "document_end"
+    }
+  ],
+  "background": {
+    "service_worker": "src/background/background.js"
+  },
+  "action": {
+    "default_popup": "src/popup/popup.html",
+    "default_title": "Jellyseerr Request Button"
+  },
+  "options_page": "src/options/options.html",
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["src/content/jellyseerr-button.js"],
+      "matches": ["https://www.imdb.com/*", "https://imdb.com/*", "https://www.rottentomatoes.com/*", "https://rottentomatoes.com/*"]
+    }
+  ]
+}

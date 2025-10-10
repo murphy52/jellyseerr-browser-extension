@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jellyseerr Request Button - Settings</title>
+    <link rel="stylesheet" href="options.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                    <path d="M12 6v6l4 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                <h1>Jellyseerr Request Button</h1>
+            </div>
+            <p class="subtitle">Configure your Jellyseerr server connection</p>
+        </header>
+
+        <main>
+            <form id="settingsForm" class="settings-form">
+                <div class="form-group">
+                    <label for="serverUrl">Jellyseerr Server URL</label>
+                    <input 
+                        type="url" 
+                        id="serverUrl" 
+                        placeholder="https://jellyseerr.example.com" 
+                        required
+                    >
+                    <small>The URL of your Jellyseerr server (including http/https)</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="apiKey">API Key</label>
+                    <input 
+                        type="password" 
+                        id="apiKey" 
+                        placeholder="Your Jellyseerr API key" 
+                        required
+                    >
+                    <small>
+                        Get your API key from Jellyseerr Settings → General → API Key
+                        <button type="button" id="toggleApiKey" class="toggle-password">
+                            Show
+                        </button>
+                    </small>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" id="testConnection" class="button secondary">
+                        Test Connection
+                    </button>
+                    <button type="submit" class="button primary">
+                        Save Settings
+                    </button>
+                </div>
+            </form>
+
+            <div id="status" class="status hidden">
+                <div class="status-content">
+                    <div class="status-icon"></div>
+                    <div class="status-text"></div>
+                </div>
+            </div>
+
+            <section class="help-section">
+                <h2>How to get your API Key</h2>
+                <ol>
+                    <li>Open your Jellyseerr web interface</li>
+                    <li>Go to <strong>Settings → General</strong></li>
+                    <li>Scroll down to find the <strong>API Key</strong> section</li>
+                    <li>Copy the API key and paste it above</li>
+                </ol>
+            </section>
+
+            <section class="features-section">
+                <h2>Features</h2>
+                <ul>
+                    <li>✅ Add request buttons to IMDB movie and TV show pages</li>
+                    <li>✅ Add request buttons to Rotten Tomatoes movie and TV show pages</li>
+                    <li>✅ Automatic media matching using title and year</li>
+                    <li>✅ Visual feedback for request status</li>
+                    <li>✅ Support for both movies and TV series</li>
+                </ul>
+            </section>
+        </main>
+
+        <footer>
+            <p>
+                Having issues? 
+                <a href="https://github.com/your-username/jellyseerr-browser-extension/issues" target="_blank">
+                    Report a bug
+                </a>
+            </p>
+        </footer>
+    </div>
+
+    <script src="options.js"></script>
+</body>
+</html>

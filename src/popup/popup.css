@@ -1,0 +1,262 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.4;
+    color: #333;
+    width: 350px;
+    height: 400px;
+    background: white;
+}
+
+.popup-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.popup-header {
+    background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+    color: white;
+    padding: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.logo h1 {
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #6b7280;
+    animation: pulse 2s infinite;
+}
+
+.status-indicator.connected .status-dot {
+    background: #10b981;
+    animation: none;
+}
+
+.status-indicator.error .status-dot {
+    background: #ef4444;
+    animation: none;
+}
+
+.status-indicator.warning .status-dot {
+    background: #f59e0b;
+    animation: none;
+}
+
+.popup-main {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.state-content {
+    display: block;
+}
+
+.state-content.hidden {
+    display: none;
+}
+
+.info-section {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.info-section h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #374151;
+}
+
+.info-section p {
+    color: #6b7280;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.warning-icon,
+.error-icon {
+    font-size: 32px;
+    margin-bottom: 12px;
+}
+
+.stats {
+    background: #f9fafb;
+    border-radius: 8px;
+    padding: 16px;
+    margin-top: 16px;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.stat-item:last-child {
+    border-bottom: none;
+}
+
+.stat-label {
+    font-size: 13px;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.stat-value {
+    font-size: 13px;
+    color: #374151;
+    font-weight: 500;
+    max-width: 180px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.popup-footer {
+    padding: 16px;
+    border-top: 1px solid #e5e7eb;
+    background: #f9fafb;
+}
+
+.button-group {
+    display: flex;
+    gap: 8px;
+}
+
+.button {
+    flex: 1;
+    padding: 10px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.button.primary {
+    background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+    color: white;
+}
+
+.button.primary:hover {
+    background: linear-gradient(135deg, #6d28d9 0%, #9333ea 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(124, 58, 237, 0.3);
+}
+
+.button.secondary {
+    background: white;
+    color: #374151;
+    border: 1px solid #d1d5db;
+}
+
+.button.secondary:hover {
+    background: #f3f4f6;
+    border-color: #9ca3af;
+}
+
+.button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+.button.hidden {
+    display: none;
+}
+
+.button svg {
+    width: 16px;
+    height: 16px;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+/* Loading state */
+.loading .status-dot {
+    background: #f59e0b;
+    animation: pulse 1s infinite;
+}
+
+/* Responsive adjustments */
+@media (max-width: 380px) {
+    body {
+        width: 320px;
+    }
+    
+    .popup-header {
+        padding: 12px;
+    }
+    
+    .popup-main {
+        padding: 16px;
+    }
+    
+    .popup-footer {
+        padding: 12px;
+    }
+    
+    .button-group {
+        flex-direction: column;
+    }
+}
+
+/* Scrollbar styling */
+.popup-main::-webkit-scrollbar {
+    width: 4px;
+}
+
+.popup-main::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.popup-main::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 2px;
+}
+
+.popup-main::-webkit-scrollbar-thumb:hover {
+    background: #a1a1a1;
+}
