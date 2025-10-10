@@ -211,7 +211,7 @@ class LetterboxdIntegration extends BaseIntegration {
       }
       
       .jellyseerr-connection-status.pending {
-        color: #fa8c16 !important; /* Orange */
+        color: #ffffff !important; /* White - better visibility on green background */
       }
       
       .jellyseerr-connection-status.downloading {
