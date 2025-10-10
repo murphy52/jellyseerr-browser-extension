@@ -690,8 +690,8 @@ class IMDBJellyseerrIntegration {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   max-width: 350px;
   
-  /* Start collapsed */
-  transform: translateY(-50%) translateX(calc(100% - 60px));
+  /* Start collapsed - hide everything except the tab */
+  transform: translateY(-50%) translateX(100%);
 }
 
 #jellyseerr-flyout.expanded {
@@ -721,8 +721,8 @@ class IMDBJellyseerrIntegration {
 
 .jellyseerr-tab:hover {
   background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
-  transform: translateY(-50%) translateX(-2px);
-  box-shadow: -4px 0 16px rgba(0, 0, 0, 0.2);
+  transform: translateY(-50%) translateX(-4px);
+  box-shadow: -6px 0 16px rgba(0, 0, 0, 0.2);
 }
 
 .jellyseerr-tab-icon {
@@ -923,7 +923,7 @@ class IMDBJellyseerrIntegration {
 /* Responsive behavior */
 @media (max-width: 768px) {
   #jellyseerr-flyout {
-    transform: translateY(-50%) translateX(calc(100% - 50px));
+    transform: translateY(-50%) translateX(100%);
     max-width: 300px;
   }
   
