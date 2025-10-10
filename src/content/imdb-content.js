@@ -4,7 +4,7 @@
 console.log('🎬 [IMDB] Script file loaded!', window.location.href);
 
 // Debug flag - set to true to enable console logging
-const DEBUG = true;
+const DEBUG = false;
 const log = (...args) => DEBUG && console.log('🎬 [IMDB]', ...args);
 const warn = (...args) => DEBUG && console.warn('🚨 [IMDB]', ...args);
 const error = (...args) => console.error('🚨 [IMDB]', ...args);

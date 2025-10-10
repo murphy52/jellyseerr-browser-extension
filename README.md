@@ -1,15 +1,23 @@
 # Jellyseerr Request Button Browser Extension
 
-A browser extension that adds request buttons to IMDB and Rotten Tomatoes pages, allowing you to easily add movies and TV shows to your Jellyseerr requests directly from these popular movie databases.
+A browser extension that seamlessly integrates with IMDB and Rotten Tomatoes, allowing you to request movies and TV shows directly from these popular sites to your Jellyseerr server.
 
-## Features
+![Version](https://img.shields.io/badge/version-1.0.4-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
+![Chrome](https://img.shields.io/badge/Chrome-Compatible-brightgreen)
+![Firefox](https://img.shields.io/badge/Firefox-Compatible-brightgreen)
 
-- ✅ **IMDB Integration**: Adds request buttons to movie and TV show pages on IMDB
-- ✅ **Rotten Tomatoes Integration**: Adds request buttons to movie and TV show pages on Rotten Tomatoes  
-- ✅ **Automatic Media Matching**: Uses title, year, and other metadata for accurate matching
-- ✅ **Visual Feedback**: Loading states, success/error notifications, and button state changes
-- ✅ **Clean UI**: Styled buttons that integrate well with both sites
-- ✅ **Configuration**: Easy setup through extension options page
+## ✨ Features
+
+- 🎬 **IMDB Integration**: Adds intelligent request flyout to movie and TV show pages
+- 🍅 **Rotten Tomatoes Integration**: Modern flyout interface with status indicators
+- 🔍 **Smart Media Matching**: Advanced search with fallback terms for accurate matching
+- 📊 **Real-time Status**: Shows current request status (Available, Pending, Downloading, etc.)
+- 🎨 **Modern UI**: Beautiful flyout design inspired by modern web apps
+- ⚡ **Fast Performance**: Lightweight and optimized for quick loading
+- 🔧 **Easy Configuration**: Simple setup through extension options
+- 🔄 **Auto-retry**: Intelligent retry logic for network issues
+- 🎯 **Precise Matching**: Uses title, year, and metadata for accurate identification
 
 ## Installation
 
@@ -38,18 +46,40 @@ A browser extension that adds request buttons to IMDB and Rotten Tomatoes pages,
 5. Click "Test Connection" to verify your settings
 6. Click "Save Settings"
 
-## Usage
+## 🚀 Usage
 
-1. Navigate to any movie or TV show page on IMDB or Rotten Tomatoes
-2. Look for the purple "Request on Jellyseerr" button (usually appears near ratings/metadata)
-3. Click the button to add the media to your Jellyseerr requests
-4. The button will show loading state, then success or error feedback
-5. You'll receive a notification confirming the request was submitted
+### IMDB
+1. Navigate to any movie or TV show page on IMDB (e.g., `imdb.com/title/tt1234567`)
+2. Look for the Jellyseerr request button that appears automatically
+3. Click the button to request the media
+4. Watch the button change to show request status
 
-## Supported Sites
+### Rotten Tomatoes  
+1. Navigate to any movie or TV show page on Rotten Tomatoes
+2. Look for the **Jellyseerr flyout tab** on the right side of your screen
+3. Click the tab to expand the flyout panel
+4. View current status and click the action button to request
+5. The flyout shows real-time status with color-coded indicators:
+   - 🟢 **Green**: Available to request or ready to watch
+   - 🟡 **Orange**: Request pending approval
+   - 🔵 **Blue**: Currently downloading
+   - 🔴 **Red**: Error or connection issue
 
-- **IMDB**: `imdb.com/title/*` pages
-- **Rotten Tomatoes**: `rottentomatoes.com/m/*` and `rottentomatoes.com/tv/*` pages
+## 🖼️ Screenshots
+
+### Rotten Tomatoes Integration
+- **Flyout Tab**: Elegant side panel that doesn't interfere with the website
+- **Status Indicators**: Color-coded status with clear visual feedback
+- **Modern Design**: Matches modern web app aesthetics
+
+### IMDB Integration  
+- **Seamless Buttons**: Integrates naturally with IMDB's design
+- **Instant Feedback**: Shows loading, success, and error states
+
+## 🔗 Supported Sites
+
+- **IMDB**: All movie and TV show pages (`imdb.com/title/*`)
+- **Rotten Tomatoes**: Movie pages (`rottentomatoes.com/m/*`) and TV pages (`rottentomatoes.com/tv/*`)
 
 ## File Structure
 
@@ -83,44 +113,103 @@ jellyseerr-browser-extension/
 4. **Search & Match**: Searches Jellyseerr database to find the correct media entry
 5. **Request Submission**: Submits request to Jellyseerr with proper media ID and user preferences
 
-## Troubleshooting
+## 🔧 Troubleshooting
 
-### Button Not Appearing
-- Make sure you're on a specific movie/TV show page (not search results or lists)
-- Check that the extension is properly configured in settings
-- Try refreshing the page
+### Extension Not Appearing
+- **IMDB**: Make sure you're on a specific title page (`/title/tt*`), not search results
+- **Rotten Tomatoes**: Look for the flyout tab on the right side; try refreshing if not visible
+- Ensure the extension is enabled in your browser's extension manager
+- Check that you're on supported page URLs
 
 ### Connection Issues
-- Verify your Jellyseerr server URL is correct and accessible
-- Check that your API key is valid (test in extension settings)
-- Ensure your Jellyseerr server allows requests from your browser (CORS)
+- **Red status indicator**: Server connection failed
+- Verify your Jellyseerr server URL is correct and accessible from your browser
+- Test your API key using the "Test Connection" button in extension settings
+- Check your network connection and firewall settings
+- Ensure Jellyseerr server allows CORS requests from your domain
 
 ### Request Failures
-- The movie/TV show might not be in the Jellyseerr database
-- Check Jellyseerr logs for more detailed error information
-- Try requesting the media directly in Jellyseerr to confirm it's available
+- **Search failures**: Media might not exist in TMDB/Jellyseerr database
+- **Matching issues**: Try different search terms or check the exact title
+- **Server errors**: Check Jellyseerr server logs for detailed error information
+- **API limits**: Your Jellyseerr server might have rate limiting enabled
 
-## Development
+### Debug Mode
+- Set `DEBUG = true` in content scripts for detailed console logging
+- Use browser developer tools (F12) to inspect network requests
+- Check the extension's background page for error messages
 
-To modify or contribute to this extension:
+## 💻 Development
 
-1. Clone the repository
-2. Make your changes
-3. Load the extension in developer mode to test
-4. Ensure all content scripts, background scripts, and UI components work correctly
+### Contributing
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Make your changes
+4. Test thoroughly on both IMDB and Rotten Tomatoes
+5. Commit your changes (`git commit -m 'Add amazing feature'`)
+6. Push to the branch (`git push origin feature/amazing-feature`)
+7. Open a Pull Request
 
-## Privacy
+### Local Development
+1. Clone the repository: `git clone <repo-url>`
+2. Load the extension in developer mode:
+   - **Chrome**: Go to `chrome://extensions/`, enable Developer mode, click "Load unpacked"
+   - **Firefox**: Go to `about:debugging`, click "Load Temporary Add-on"
+3. Make changes to the source code
+4. Reload the extension to see changes
+5. Test on both supported sites
 
-This extension:
-- Only accesses IMDB and Rotten Tomatoes pages you visit
-- Communicates only with your configured Jellyseerr server
-- Does not track or store personal data beyond your server configuration
-- Stores settings locally using Chrome's sync storage API
+### Architecture
+- **Content Scripts**: Extract media data and inject UI elements
+- **Background Service Worker**: Handles API communication with Jellyseerr
+- **Popup/Options**: User interface for configuration and status
+- **Manifest V3**: Uses latest extension API standards
 
-## Support
+## 📋 Changelog
 
-For issues, suggestions, or contributions, please visit the project repository or create an issue.
+### v1.0.4 (Stable Release)
+- ✨ **Rotten Tomatoes**: Complete redesign with modern flyout interface
+- 📊 **Status Tracking**: Real-time status indicators with color coding
+- 🔄 **Auto-retry**: Intelligent retry logic for network issues
+- 🔍 **Smart Search**: Advanced search with multiple fallback terms
+- 🎨 **Modern UI**: Beautiful flyout design inspired by modern web apps
+- ⚡ **Performance**: Optimized loading and reduced console logging
+- 🐛 **Bug Fixes**: Resolved manifest issues and improved error handling
 
-## License
+### v1.0.3
+- Enhanced IMDB integration with better media detection
+- Improved error handling and user feedback
+- Added comprehensive configuration options
 
-This project is open source. See the LICENSE file for details.
+### v1.0.2  
+- Initial Rotten Tomatoes support
+- Basic request functionality for both sites
+
+### v1.0.1
+- IMDB integration and core functionality
+- Background service worker implementation
+
+## 🔒 Privacy
+
+This extension is designed with privacy in mind:
+- ✅ **Local Processing**: All media detection happens locally in your browser
+- ✅ **Minimal Data**: Only communicates with your configured Jellyseerr server
+- ✅ **No Tracking**: Does not collect, store, or transmit personal data
+- ✅ **Secure Storage**: Settings stored locally using browser's secure storage API
+- ✅ **Open Source**: Full source code available for transparency
+
+## 🚑 Support
+
+Need help or have suggestions?
+- 🐛 **Issues**: Create an issue in the project repository
+- 💬 **Discussions**: Join discussions for feature requests
+- 📈 **Contributing**: See the Development section above
+- ⭐ **Like it?**: Star the repository to show support!
+
+## 📄 License
+
+This project is open source and available under the MIT License. See the LICENSE file for details.
+
+---
+
+**Made with ❤️ for the Jellyseerr community**
