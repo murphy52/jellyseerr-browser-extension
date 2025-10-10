@@ -216,29 +216,35 @@ class IMDBJellyseerrIntegration {
 
     // Comprehensive IMDB insertion points for different layouts (TV series vs movies)
     const insertionPoints = [
-      // PRIMARY: Right sidebar - watchlist and rating areas
+      // PRIMARY: Watchlist area - highest priority for sidebar placement
+      '.ipc-btn--add-to-watchlist', // Add to Watchlist button
+      '[data-testid="tm-box-wl-button"]', // Watchlist button container
+      '.ipc-watchlist-ribbon', // Watchlist ribbon
+      '[class*="watchlist"]', // Any element with watchlist in class name
+      '[class*="wl-button"]', // Watchlist button variations
+      
+      // SECONDARY: Rating areas in sidebar
       '[data-testid="hero-rating-bar__user-rating"]', // User rating section
       '[data-testid="hero-rating-bar__watchlist"]', // Watchlist button area
       '[data-testid="title-ratingWidget"]', // Rating widget
       '[data-testid="hero-rating-bar"]', // Overall rating bar
       
-      // TV Series specific selectors
+      // TV Series specific - hero area selectors (higher priority)
       '[data-testid="hero-title-block__user-rating"]', // User rating in hero
       '[data-testid="hero-title-block__metadata"]', // Metadata area
-      '[data-testid="title-pc-principal-credit"]', // Principal credits
-      
-      // Movie specific selectors
-      '.ipc-watchlist-ribbon', // Watchlist ribbon
-      '.titlereference-watch-ribbon', // Watch ribbon
-      
-      // General hero/header areas
       '[data-testid="hero-title-block"]', // Main title block
       '[data-testid="hero-media"]', // Hero media section
       
-      // Content areas (broader selectors)
+      // Movie specific selectors
+      '.titlereference-watch-ribbon', // Watch ribbon
+      
+      // Content areas (broader selectors) - LOWER PRIORITY
       '[data-testid="title-overview-widget"]', // Overview widget
       '[data-testid="storyline-plot-summary"]', // Plot summary
       '[data-testid="title-details-section"]', // Details section
+      
+      // Principal credits - MOVED TO LOW PRIORITY
+      '[data-testid="title-pc-principal-credit"]', // Principal credits (creators section)
       
       // Page structure fallbacks
       '.ipc-page-grid', // Page grid
