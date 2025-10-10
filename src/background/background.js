@@ -15,7 +15,12 @@ class JellyseerrAPI {
     chrome.storage.onChanged.addListener((changes, namespace) => {
       if (namespace === 'sync' && (changes.jellyseerrUrl || changes.jellyseerrApiKey)) {
         console.log('🔄 [Background] Settings changed, reloading...');
+        console.log('🔄 [Background] Changed keys:', Object.keys(changes));
+        console.log('🔄 [Background] New URL:', changes.jellyseerrUrl?.newValue);
+        console.log('🔄 [Background] New API Key:', changes.jellyseerrApiKey?.newValue ? '[REDACTED]' : 'undefined');
         this.loadSettings();
+        console.log('🔄 [Background] Settings reloaded. Current URL:', this.baseUrl);
+        console.log('🔄 [Background] Settings reloaded. API Key set:', !!this.apiKey);
       }
     });
     
@@ -939,22 +944,7 @@ class JellyseerrAPI {
 // Initialize the API handler
 const jellyseerrAPI = new JellyseerrAPI();
 
-// Listen for storage changes to update settings
-chrome.storage.onChanged.addListener((changes, namespace) => {
-  if (namespace === 'sync') {
-    const settings = {};
-    if (changes.jellyseerrUrl) {
-      settings.jellyseerrUrl = changes.jellyseerrUrl.newValue;
-    }
-    if (changes.jellyseerrApiKey) {
-      settings.jellyseerrApiKey = changes.jellyseerrApiKey.newValue;
-    }
-    
-    if (Object.keys(settings).length > 0) {
-      jellyseerrAPI.updateSettings(settings);
-    }
-  }
-});
+// Note: Storage change listener is now handled inside the JellyseerrAPI class constructor to avoid duplication
 
 // Handle extension installation
 chrome.runtime.onInstalled.addListener((details) => {

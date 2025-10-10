@@ -6,6 +6,7 @@ class OptionsManager {
     this.serverUrlInput = document.getElementById('serverUrl');
     this.apiKeyInput = document.getElementById('apiKey');
     this.testButton = document.getElementById('testConnection');
+    this.reloadButton = document.getElementById('reloadSettings');
     this.toggleButton = document.getElementById('toggleApiKey');
     this.statusDiv = document.getElementById('status');
     
@@ -19,6 +20,7 @@ class OptionsManager {
     // Bind event listeners
     this.form.addEventListener('submit', (e) => this.handleSave(e));
     this.testButton.addEventListener('click', () => this.testConnection());
+    this.reloadButton.addEventListener('click', () => this.reloadSettings());
     this.toggleButton.addEventListener('click', () => this.toggleApiKeyVisibility());
     
     // Auto-save on input change (with debounce)
@@ -91,6 +93,37 @@ class OptionsManager {
     } catch (error) {
       console.error('Error saving settings:', error);
       this.showStatus('error', 'Failed to save settings');
+    }
+  }
+
+  async reloadSettings() {
+    this.reloadButton.disabled = true;
+    this.reloadButton.textContent = 'Reloading...';
+    this.showStatus('loading', 'Forcing background script to reload settings...');
+
+    try {
+      // Tell background script to reload settings from storage
+      const response = await new Promise((resolve, reject) => {
+        chrome.runtime.sendMessage({ action: 'reloadSettings' }, (response) => {
+          if (chrome.runtime.lastError) {
+            reject(new Error(chrome.runtime.lastError.message));
+          } else {
+            resolve(response);
+          }
+        });
+      });
+
+      if (response.success) {
+        this.showStatus('success', 'Settings reloaded successfully! Try your connection now.');
+      } else {
+        this.showStatus('error', response.error || 'Failed to reload settings');
+      }
+    } catch (error) {
+      console.error('Settings reload error:', error);
+      this.showStatus('error', `Failed to reload settings: ${error.message}`);
+    } finally {
+      this.reloadButton.disabled = false;
+      this.reloadButton.textContent = 'Reload Settings';
     }
   }
 
