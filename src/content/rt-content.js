@@ -1,7 +1,7 @@
 // Rotten Tomatoes Content Script for Jellyseerr Integration
 
 // Debug flag - set to true to enable console logging
-const DEBUG = true;
+const DEBUG = false;
 const log = (...args) => DEBUG && console.log('🍅 [RT]', ...args);
 const warn = (...args) => DEBUG && console.warn('🚨 [RT]', ...args);
 const error = (...args) => console.error('🚨 [RT]', ...args);
