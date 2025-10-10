@@ -271,7 +271,7 @@ class TraktIntegration extends BaseIntegration {
       }
       
       .jellyseerr-connection-status.pending {
-        color: #fa8c16 !important; /* Orange */
+        color: #fadb14 !important; /* Yellow - complements green and works on red/purple */
       }
       
       .jellyseerr-connection-status.downloading {
