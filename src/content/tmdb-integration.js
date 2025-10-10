@@ -179,6 +179,48 @@ class TMDbIntegration extends BaseIntegration {
         border-color: #0099cc !important;
         box-shadow: 0 4px 12px rgba(1, 180, 228, 0.4) !important;
       }
+      
+      /* TMDb-specific status indicator colors (Issue #2 fix) */
+      .jellyseerr-status-icon.available {
+        background: #90cea1 !important; /* TMDb green accent */
+      }
+      
+      .jellyseerr-status-icon.pending {
+        background: #fdb462 !important; /* Warm orange that works with blue */
+      }
+      
+      .jellyseerr-status-icon.downloading {
+        background: #01b4e4 !important; /* TMDb blue for downloading */
+      }
+      
+      .jellyseerr-status-icon.error {
+        background: #e74c3c !important; /* Clear red that works with blue theme */
+      }
+      
+      .jellyseerr-status-icon.partial {
+        background: #90cea1 !important; /* TMDb green since content is available */
+      }
+      
+      /* TMDb tab status colors - optimized for blue theme visibility */
+      .jellyseerr-connection-status.available {
+        color: #90cea1 !important; /* TMDb green */
+      }
+      
+      .jellyseerr-connection-status.pending {
+        color: #fdb462 !important; /* Warm orange */
+      }
+      
+      .jellyseerr-connection-status.downloading {
+        color: #01b4e4 !important; /* TMDb blue */
+      }
+      
+      .jellyseerr-connection-status.error {
+        color: #e74c3c !important; /* Clear red */
+      }
+      
+      .jellyseerr-connection-status.partial {
+        color: #90cea1 !important; /* TMDb green */
+      }
     `;
   }
 }

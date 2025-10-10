@@ -11,6 +11,14 @@ class JellyseerrAPI {
     // Load settings from storage
     await this.loadSettings();
     
+    // Listen for settings changes (Issue #1 fix)
+    chrome.storage.onChanged.addListener((changes, namespace) => {
+      if (namespace === 'sync' && (changes.jellyseerrUrl || changes.jellyseerrApiKey)) {
+        console.log('🔄 [Background] Settings changed, reloading...');
+        this.loadSettings();
+      }
+    });
+    
     // Listen for messages from content scripts
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       this.handleMessage(request, sender, sendResponse);
@@ -64,6 +72,12 @@ class JellyseerrAPI {
         case 'getMediaStatus':
           const statusResult = await this.getMediaStatus(request.data);
           sendResponse({ success: true, data: statusResult });
+          break;
+          
+        case 'reloadSettings':
+          // Force reload settings (Issue #1 additional fix)
+          await this.loadSettings();
+          sendResponse({ success: true, data: 'Settings reloaded' });
           break;
           
         default:

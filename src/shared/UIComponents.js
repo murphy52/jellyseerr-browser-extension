@@ -98,7 +98,13 @@ class UIComponents {
 
     button.classList.remove('loading', 'success', 'error', 'pending', 'available', 'downloading');
     button.classList.add(statusData.buttonClass || 'request');
-    button.disabled = statusData.disabled || false;
+    
+    // Disable button for pending/requested status (Issue #3 fix)
+    const shouldDisable = statusData.disabled || 
+                         statusData.status === 'pending' || 
+                         statusData.status === 'requested' ||
+                         statusData.status === 'downloading';
+    button.disabled = shouldDisable;
 
     let iconPath = 'M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z'; // Default plus icon
 
