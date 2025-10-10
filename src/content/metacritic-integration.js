@@ -218,25 +218,25 @@ class MetacriticIntegration extends BaseIntegration {
         background: #cf1322 !important; /* Dark red for contrast */
       }
       
-      /* Metacritic tab status colors - dark colors for visibility on yellow */
+      /* Metacritic tab status colors - black to match tab text on yellow */
       .jellyseerr-connection-status.available {
-        color: #389e0d !important; /* Dark green */
+        color: #000000 !important; /* Black like tab text - no color clash */
       }
       
       .jellyseerr-connection-status.pending {
-        color: #d46b08 !important; /* Dark orange */
+        color: #000000 !important; /* Black like tab text - better visibility */
       }
       
       .jellyseerr-connection-status.downloading {
-        color: #1d39c4 !important; /* Dark blue */
+        color: #1d39c4 !important; /* Keep dark blue - works well on yellow */
       }
       
       .jellyseerr-connection-status.ready {
-        color: #389e0d !important; /* Dark green */
+        color: #000000 !important; /* Black like tab text */
       }
       
       .jellyseerr-connection-status.partial {
-        color: #389e0d !important; /* Dark green */
+        color: #000000 !important; /* Black like tab text */
       }
       
       .jellyseerr-connection-status.error {
