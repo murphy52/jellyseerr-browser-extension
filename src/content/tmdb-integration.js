@@ -143,68 +143,41 @@ class TMDbIntegration extends BaseIntegration {
    */
   getSiteSpecificCSS() {
     return `
-      /* TMDb-specific styles */
+      /* TMDb Blue Theme Override */
       
-      /* Adjust flyout position for TMDb layout */
-      .jellyseerr-flyout {
-        top: 20% !important;
-      }
-      
-      /* Better integration with TMDb's design */
-      .jellyseerr-request-button {
-        margin: 10px 0;
-        font-size: 0.9rem;
-      }
-      
-      /* Dark mode adjustments for TMDb */
-      @media (prefers-color-scheme: dark) {
-        .jellyseerr-panel {
-          background: #0d253f !important;
-          border-color: #01b4e4 !important;
-        }
-        
-        .jellyseerr-tab {
-          background: linear-gradient(135deg, #01b4e4 0%, #90cea1 100%) !important;
-        }
-        
-        .jellyseerr-tab:hover {
-          background: linear-gradient(135deg, #0099cc 0%, #7bb18a 100%) !important;
-        }
-      }
-      
-      /* TMDb blue theme integration */
       .jellyseerr-tab {
         background: linear-gradient(135deg, #01b4e4 0%, #90cea1 100%) !important;
+        border-color: #01b4e4 !important;
+        box-shadow: -2px 0 12px rgba(1, 180, 228, 0.3) !important;
       }
       
       .jellyseerr-tab:hover {
         background: linear-gradient(135deg, #0099cc 0%, #7bb18a 100%) !important;
+        border-color: #0099cc !important;
+        box-shadow: -6px 0 16px rgba(1, 180, 228, 0.4) !important;
       }
       
+      /* TMDb blue theme for all button states (consistent branding) */
       .jellyseerr-action-button {
         background: linear-gradient(135deg, #01b4e4 0%, #90cea1 100%) !important;
+        border-color: #01b4e4 !important;
       }
       
       .jellyseerr-action-button:hover:not(:disabled) {
         background: linear-gradient(135deg, #0099cc 0%, #7bb18a 100%) !important;
+        border-color: #0099cc !important;
         box-shadow: 0 4px 12px rgba(1, 180, 228, 0.4) !important;
       }
       
-      /* Mobile responsiveness for TMDb */
-      @media (max-width: 768px) {
-        .jellyseerr-flyout {
-          max-width: 280px !important;
-        }
-        
-        .jellyseerr-panel {
-          width: 260px !important;
-        }
-        
-        .jellyseerr-tab {
-          left: -45px !important;
-          width: 45px !important;
-          height: 100px !important;
-        }
+      .jellyseerr-request-button {
+        background: linear-gradient(135deg, #01b4e4 0%, #90cea1 100%) !important;
+        border-color: #01b4e4 !important;
+      }
+      
+      .jellyseerr-request-button:hover:not(:disabled) {
+        background: linear-gradient(135deg, #0099cc 0%, #7bb18a 100%) !important;
+        border-color: #0099cc !important;
+        box-shadow: 0 4px 12px rgba(1, 180, 228, 0.4) !important;
       }
     `;
   }

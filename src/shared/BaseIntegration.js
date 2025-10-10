@@ -29,6 +29,8 @@ class BaseIntegration {
     // State
     this.mediaData = null;
     this.uiElements = {};
+    this.currentUrl = window.location.href;
+    this.navigationListener = null;
     
     this.log('BaseIntegration initialized for', this.siteName);
   }
@@ -65,6 +67,9 @@ class BaseIntegration {
       this.log(`Retry extraction after ${this.retryDelay}ms`);
       this.extractAndSetup();
     }, this.retryDelay);
+
+    // Setup SPA navigation detection
+    this.setupNavigationDetection();
   }
 
   /**
@@ -401,6 +406,106 @@ class BaseIntegration {
     }
     this.log(`No ${context} found with selectors:`, selectors);
     return null;
+  }
+
+  /**
+   * Setup Single Page Application (SPA) navigation detection
+   * Detects URL changes without page refreshes (like React Router)
+   */
+  setupNavigationDetection() {
+    this.log('Setting up SPA navigation detection');
+    
+    // Method 1: Override pushState and replaceState (most reliable)
+    const originalPushState = history.pushState;
+    const originalReplaceState = history.replaceState;
+    
+    const handleNavigation = () => {
+      const newUrl = window.location.href;
+      if (newUrl !== this.currentUrl) {
+        this.log('SPA navigation detected:', this.currentUrl, '->', newUrl);
+        this.currentUrl = newUrl;
+        this.handleNavigationChange();
+      }
+    };
+    
+    // Override history methods
+    history.pushState = function(...args) {
+      originalPushState.apply(history, args);
+      setTimeout(handleNavigation, 100); // Small delay for React to update DOM
+    };
+    
+    history.replaceState = function(...args) {
+      originalReplaceState.apply(history, args);
+      setTimeout(handleNavigation, 100);
+    };
+    
+    // Method 2: Listen for popstate (back/forward buttons)
+    window.addEventListener('popstate', () => {
+      setTimeout(handleNavigation, 100);
+    });
+    
+    // Method 3: Polling as fallback (for edge cases)
+    this.navigationListener = setInterval(() => {
+      const newUrl = window.location.href;
+      if (newUrl !== this.currentUrl) {
+        this.log('Navigation detected via polling:', this.currentUrl, '->', newUrl);
+        this.currentUrl = newUrl;
+        this.handleNavigationChange();
+      }
+    }, 1000);
+  }
+
+  /**
+   * Handle navigation change in SPAs
+   */
+  async handleNavigationChange() {
+    this.log('Handling navigation change to:', this.currentUrl);
+    
+    // Clean up existing UI
+    this.cleanupUI();
+    
+    // Wait a bit for the new page content to load
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // Re-extract and setup for the new page
+    await this.extractAndSetup();
+    
+    // Retry after delay for dynamic content
+    setTimeout(() => {
+      this.log('Retry extraction after navigation');
+      this.extractAndSetup();
+    }, this.retryDelay);
+  }
+
+  /**
+   * Clean up existing UI elements
+   */
+  cleanupUI() {
+    this.log('Cleaning up existing UI');
+    
+    // Remove flyout if it exists
+    if (this.uiElements.flyout && this.uiElements.flyout.parentNode) {
+      this.uiElements.flyout.parentNode.removeChild(this.uiElements.flyout);
+    }
+    
+    // Remove button if it exists
+    if (this.uiElements.button && this.uiElements.button.parentNode) {
+      this.uiElements.button.parentNode.removeChild(this.uiElements.button);
+    }
+    
+    // Clear references
+    this.uiElements = {};
+    this.mediaData = null;
+  }
+
+  /**
+   * Cleanup when extension is unloaded
+   */
+  destroy() {
+    if (this.navigationListener) {
+      clearInterval(this.navigationListener);
+    }
+    this.cleanupUI();
   }
 }
 

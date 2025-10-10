@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Jellyseerr Request Button",
-  "version": "1.1.0",
-  "description": "Add movies and TV shows to Jellyseerr directly from IMDB, Rotten Tomatoes, and TheMovieDB",
+  "version": "1.4.0",
+  "description": "Add movies and TV shows to Jellyseerr directly from IMDB, Rotten Tomatoes, TheMovieDB, Letterboxd, Metacritic, and Trakt",
   "permissions": [
     "storage",
     "activeTab"
@@ -14,6 +14,13 @@
     "https://rottentomatoes.com/*",
     "https://www.themoviedb.org/*",
     "https://themoviedb.org/*",
+    "https://letterboxd.com/*",
+    "https://www.letterboxd.com/*",
+    "https://www.metacritic.com/*",
+    "https://metacritic.com/*",
+    "https://trakt.tv/*",
+    "https://www.trakt.tv/*",
+    "https://app.trakt.tv/*",
     "http://localhost/*",
     "https://*/*"
   ],
@@ -23,8 +30,13 @@
         "https://www.imdb.com/title/*",
         "https://imdb.com/title/*"
       ],
-      "js": ["src/content/imdb-content.js"],
-      "css": ["src/content/content-styles.css"],
+      "js": [
+        "src/shared/JellyseerrClient.js",
+        "src/shared/MediaExtractor.js",
+        "src/shared/UIComponents.js",
+        "src/shared/BaseIntegration.js",
+        "src/content/imdb-integration.js"
+      ],
       "run_at": "document_end"
     },
     {
@@ -34,8 +46,13 @@
         "https://www.rottentomatoes.com/tv/*",
         "https://rottentomatoes.com/tv/*"
       ],
-      "js": ["src/content/rt-content.js"],
-      "css": ["src/content/content-styles.css"],
+      "js": [
+        "src/shared/JellyseerrClient.js",
+        "src/shared/MediaExtractor.js",
+        "src/shared/UIComponents.js",
+        "src/shared/BaseIntegration.js",
+        "src/content/rt-integration.js"
+      ],
       "run_at": "document_end"
     },
     {
@@ -51,6 +68,54 @@
         "src/shared/UIComponents.js",
         "src/shared/BaseIntegration.js",
         "src/content/tmdb-integration.js"
+      ],
+      "run_at": "document_end"
+    },
+    {
+      "matches": [
+        "https://letterboxd.com/film/*",
+        "https://www.letterboxd.com/film/*"
+      ],
+      "js": [
+        "src/shared/JellyseerrClient.js",
+        "src/shared/MediaExtractor.js",
+        "src/shared/UIComponents.js",
+        "src/shared/BaseIntegration.js",
+        "src/content/letterboxd-integration.js"
+      ],
+      "run_at": "document_end"
+    },
+    {
+      "matches": [
+        "https://www.metacritic.com/movie/*",
+        "https://metacritic.com/movie/*",
+        "https://www.metacritic.com/tv/*",
+        "https://metacritic.com/tv/*"
+      ],
+      "js": [
+        "src/shared/JellyseerrClient.js",
+        "src/shared/MediaExtractor.js",
+        "src/shared/UIComponents.js",
+        "src/shared/BaseIntegration.js",
+        "src/content/metacritic-integration.js"
+      ],
+      "run_at": "document_end"
+    },
+    {
+      "matches": [
+        "https://trakt.tv/movies/*",
+        "https://www.trakt.tv/movies/*",
+        "https://app.trakt.tv/movies/*",
+        "https://trakt.tv/shows/*",
+        "https://www.trakt.tv/shows/*",
+        "https://app.trakt.tv/shows/*"
+      ],
+      "js": [
+        "src/shared/JellyseerrClient.js",
+        "src/shared/MediaExtractor.js",
+        "src/shared/UIComponents.js",
+        "src/shared/BaseIntegration.js",
+        "src/content/trakt-integration.js"
       ],
       "run_at": "document_end"
     }

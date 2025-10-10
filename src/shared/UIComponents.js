@@ -325,7 +325,7 @@ class UIComponents {
    */
   getSharedCSS() {
     return `
-      /* Jellyseerr Shared UI Components */
+      /* Jellyseerr Shared UI Components - Default Purple Theme */
       .jellyseerr-request-button {
         display: inline-flex;
         align-items: center;
@@ -334,7 +334,7 @@ class UIComponents {
         font-weight: 500;
         font-size: 0.875rem;
         padding: 0.5rem 1rem;
-        border: 1px solid transparent;
+        border: 2px solid #8b5cf6;
         border-radius: 0.375rem;
         cursor: pointer;
         text-decoration: none;
@@ -344,15 +344,15 @@ class UIComponents {
         z-index: 9999;
         transition: all 0.15s ease-in-out;
         outline: none;
-        background: rgba(99, 102, 241, 0.8);
-        border-color: #6366f1;
+        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
         color: white;
       }
 
       .jellyseerr-request-button:hover:not(:disabled) {
-        background: rgba(99, 102, 241, 1);
+        background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+        border-color: #7c3aed;
         transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+        box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
       }
 
       .jellyseerr-request-button:disabled {
@@ -478,6 +478,7 @@ class UIComponents {
         transform: translateY(-50%) translateX(0);
       }
 
+      /* Default Jellyseerr brand theme - purple/violet gradient */
       .jellyseerr-tab {
         position: absolute;
         left: -60px;
@@ -485,23 +486,25 @@ class UIComponents {
         transform: translateY(-50%);
         width: 60px;
         height: 120px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+        border: 2px solid #8b5cf6;
         border-radius: 8px 0 0 8px;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
         cursor: pointer;
-        box-shadow: -2px 0 12px rgba(0, 0, 0, 0.15);
+        box-shadow: -2px 0 12px rgba(139, 92, 246, 0.3);
         transition: all 0.2s ease;
         color: white;
         user-select: none;
       }
 
       .jellyseerr-tab:hover {
-        background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+        background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+        border-color: #7c3aed;
         transform: translateY(-50%) translateX(-4px);
-        box-shadow: -6px 0 16px rgba(0, 0, 0, 0.2);
+        box-shadow: -6px 0 16px rgba(139, 92, 246, 0.4);
       }
 
       .jellyseerr-tab-icon {
@@ -596,12 +599,13 @@ class UIComponents {
         font-weight: 500;
       }
 
+      /* Default Jellyseerr brand theme for action button */
       .jellyseerr-action-button {
         width: 100%;
         padding: 14px 20px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+        border: 2px solid #8b5cf6;
         color: white;
-        border: none;
         border-radius: 0 0 0 8px;
         font-size: 15px;
         font-weight: 600;
@@ -615,9 +619,10 @@ class UIComponents {
       }
 
       .jellyseerr-action-button:hover:not(:disabled) {
-        background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+        background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+        border-color: #7c3aed;
         transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
       }
 
       .jellyseerr-action-button:disabled {

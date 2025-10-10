@@ -1,8 +1,8 @@
 # Jellyseerr Request Button Browser Extension
 
-A browser extension that seamlessly integrates with IMDB, Rotten Tomatoes, and TheMovieDB, allowing you to request movies and TV shows directly from these popular sites to your Jellyseerr server.
+A browser extension that seamlessly integrates with IMDB, Rotten Tomatoes, TheMovieDB, Letterboxd, Metacritic, and Trakt, allowing you to request movies and TV shows directly from these popular sites to your Jellyseerr server.
 
-![Version](https://img.shields.io/badge/version-1.1.0-blue)
+![Version](https://img.shields.io/badge/version-1.4.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Chrome](https://img.shields.io/badge/Chrome-Compatible-brightgreen)
 ![Firefox](https://img.shields.io/badge/Firefox-Compatible-brightgreen)
@@ -11,7 +11,10 @@ A browser extension that seamlessly integrates with IMDB, Rotten Tomatoes, and T
 
 - 🎬 **IMDB Integration**: Adds intelligent request buttons to movie and TV show pages
 - 🍅 **Rotten Tomatoes Integration**: Modern flyout interface with status indicators
-- 🎭 **TheMovieDB Integration**: NEW! Flyout interface with TMDb's signature blue theme
+- 🎭 **TheMovieDB Integration**: Flyout interface with TMDb's signature blue theme
+- 🍿 **Letterboxd Integration**: Clean flyout interface for the film community platform
+- 🟡 **Metacritic Integration**: Yellow-themed flyout matching Metacritic's distinctive style
+- 📊 **Trakt Integration**: Purple/pink themed flyout for the movie tracking platform
 - 🔍 **Smart Media Matching**: Advanced search with fallback terms for accurate matching
 - 📊 **Real-time Status**: Shows current request status (Available, Pending, Downloading, etc.)
 - 🏗️ **Modern Architecture**: Built with shared libraries for easy expansion to new sites
@@ -66,13 +69,38 @@ A browser extension that seamlessly integrates with IMDB, Rotten Tomatoes, and T
    - 🔵 **Blue**: Currently downloading
    - 🔴 **Red**: Error or connection issue
 
-### TheMovieDB (NEW!)
+### TheMovieDB
 1. Navigate to any movie or TV show page on TheMovieDB (e.g., `themoviedb.org/movie/12345`)
 2. Look for the **Jellyseerr flyout tab** with TMDb's signature blue theme on the right side
 3. Click the tab to expand the flyout panel
 4. Enjoy **perfect matching** since TMDb is Jellyseerr's primary data source
 5. The flyout provides the same status indicators as Rotten Tomatoes
 6. **Best accuracy**: TMDb integration offers the most reliable matching and requesting
+
+### Letterboxd
+1. Navigate to any film page on Letterboxd (e.g., `letterboxd.com/film/movie-title/`)
+2. Look for the **Jellyseerr flyout tab** with clean, minimalist styling on the right side
+3. Click the tab to expand the flyout panel
+4. **Film community integration**: Perfect for discovering and requesting films from the community
+5. The flyout provides the same status indicators as other integrations
+6. **Clean design**: Matches Letterboxd's elegant, film-focused aesthetic
+
+### Metacritic
+1. Navigate to any movie or TV show page on Metacritic (e.g., `metacritic.com/movie/movie-title` or `metacritic.com/tv/show-title`)
+2. Look for the **Jellyseerr flyout tab** with Metacritic's signature yellow theme on the right side
+3. Click the tab to expand the flyout panel
+4. **Professional reviews integration**: Request content you've researched on Metacritic
+5. **Yellow branding**: Custom styling that matches Metacritic's distinctive color scheme
+6. **Critical scores context**: Perfect for requesting highly-rated content
+
+### Trakt (NEW!)
+1. Navigate to any movie or TV show page on Trakt (e.g., `trakt.tv/shows/show-title` or `app.trakt.tv/shows/show-title`)
+2. Look for the **Jellyseerr flyout tab** with Trakt's signature red-to-purple gradient theme on the right side
+3. Click the tab to expand the flyout panel
+4. **Enhanced matching**: Trakt often provides TMDb IDs for accurate media matching
+5. Enjoy the beautiful purple/pink theme that matches Trakt's brand identity
+6. **Movie tracking integration**: Perfect for users who track their viewing on Trakt
+7. **Both domains supported**: Works on `trakt.tv`, `app.trakt.tv`, and `www.trakt.tv`
 
 ## 🖼️ Screenshots
 
@@ -90,6 +118,9 @@ A browser extension that seamlessly integrates with IMDB, Rotten Tomatoes, and T
 - **IMDB**: All movie and TV show pages (`imdb.com/title/*`)
 - **Rotten Tomatoes**: Movie pages (`rottentomatoes.com/m/*`) and TV pages (`rottentomatoes.com/tv/*`)
 - **TheMovieDB**: Movie pages (`themoviedb.org/movie/*`) and TV pages (`themoviedb.org/tv/*`) ⭐ **Most Accurate**
+- **Letterboxd**: Film pages (`letterboxd.com/film/*`) 🎬 **Film Community**
+- **Metacritic**: Movie pages (`metacritic.com/movie/*`) and TV pages (`metacritic.com/tv/*`) 🟡 **Professional Reviews**
+- **Trakt**: Movie pages (`trakt.tv/movies/*`, `app.trakt.tv/movies/*`) and TV show pages (`trakt.tv/shows/*`, `app.trakt.tv/shows/*`) 🆕 **Tracking Integration**
 
 ## File Structure
 
@@ -129,6 +160,9 @@ jellyseerr-browser-extension/
 - **IMDB**: Make sure you're on a specific title page (`/title/tt*`), not search results
 - **Rotten Tomatoes**: Look for the flyout tab on the right side; try refreshing if not visible
 - **TheMovieDB**: Look for the blue-themed flyout tab on the right side of movie/TV pages
+- **Letterboxd**: Look for the clean, minimalist flyout tab on film pages
+- **Metacritic**: Look for the yellow-themed flyout tab on movie/TV show pages
+- **Trakt**: Look for the purple/pink-themed flyout tab on movie/TV show pages
 - Ensure the extension is enabled in your browser's extension manager
 - Check that you're on supported page URLs
 
@@ -177,6 +211,17 @@ jellyseerr-browser-extension/
 - **Manifest V3**: Uses latest extension API standards
 
 ## 📋 Changelog
+
+### v1.4.0 - Trakt Integration + SPA Navigation 🚀
+- ✨ **NEW SITE**: Complete Trakt.tv integration (`trakt.tv`, `app.trakt.tv`) with flyout interface
+- 🎨 **Purple/Pink Theme**: Signature red-to-purple gradient matching Trakt's brand identity
+- 🔄 **SPA Navigation**: Automatic detection of single-page app navigation (React Router)
+- 🔍 **Smart Matching**: TMDb + IMDB ID extraction with URL fallback for SPAs
+- 📈 **Tracking Integration**: Perfect for movie/TV show tracking enthusiasts
+- 🏗️ **Future-Ready**: SPA detection built into BaseIntegration for all future sites
+- ⚡ **Auto-Updates**: Flyout updates automatically when navigating between shows/movies
+
+### v1.3.0 - Previous Release
 
 ### v1.1.0 - TheMovieDB Integration 🎆
 - ✨ **NEW SITE**: Complete TheMovieDB.org integration with flyout interface
