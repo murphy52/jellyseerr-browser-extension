@@ -314,6 +314,28 @@ class IMDBJellyseerrIntegration {
         return result;
       },
       updateTabStatus: (status) => this.updateTabStatus(status || 'available'),
+      debugSearch: async () => {
+        try {
+          const result = await new Promise((resolve, reject) => {
+            chrome.runtime.sendMessage({
+              action: 'debugSearch',
+              title: this.mediaData.title,
+              mediaType: this.mediaData.mediaType
+            }, (response) => {
+              if (chrome.runtime.lastError) {
+                reject(new Error(chrome.runtime.lastError.message));
+              } else {
+                resolve(response);
+              }
+            });
+          });
+          console.log('🔧 [Debug] Search debug result:', result);
+          return result;
+        } catch (error) {
+          console.error('🔧 [Debug] Failed to debug search:', error);
+          return error;
+        }
+      },
       getStatus: async () => {
         try {
           const status = await this.getMediaStatus(this.mediaData);
