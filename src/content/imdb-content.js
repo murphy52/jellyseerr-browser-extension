@@ -568,9 +568,13 @@ class IMDBJellyseerrIntegration {
           
           // Test Jellyseerr server connection
           const serverConnectionTest = await this.testServerConnection();
-          if (!serverConnectionTest && attempt < maxRetries) {
-            await new Promise(r => setTimeout(r, retryDelay));
-            continue;
+          if (!serverConnectionTest) {
+            if (attempt < maxRetries) {
+              await new Promise(r => setTimeout(r, retryDelay));
+              continue;
+            } else {
+              throw new Error('Cannot connect to Jellyseerr server. Please check your server URL and API key in extension settings.');
+            }
           }
           
           chrome.runtime.sendMessage({

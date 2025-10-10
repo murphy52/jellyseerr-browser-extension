@@ -529,6 +529,8 @@ class RTJellyseerrIntegration {
     // Start with loading/checking animation on tab
     this.updateTabStatus('checking');
     
+    log('🔧 [NEW VERSION] updateButtonWithStatus called - v1.0.2');
+    
     try {
       log('Checking media status...');
       const statusData = await this.getMediaStatus(this.mediaData);
@@ -680,9 +682,13 @@ class RTJellyseerrIntegration {
           
           // Test Jellyseerr server connection
           const serverConnectionTest = await this.testServerConnection();
-          if (!serverConnectionTest && attempt < maxRetries) {
-            await new Promise(r => setTimeout(r, retryDelay));
-            continue;
+          if (!serverConnectionTest) {
+            if (attempt < maxRetries) {
+              await new Promise(r => setTimeout(r, retryDelay));
+              continue;
+            } else {
+              throw new Error('Cannot connect to Jellyseerr server. Please check your server URL and API key in extension settings.');
+            }
           }
           
           chrome.runtime.sendMessage({
