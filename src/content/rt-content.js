@@ -111,15 +111,31 @@ class RTJellyseerrIntegration {
     ];
     log('Trying year selectors:', yearSelectors);
 
-    for (const selector of yearSelectors) {
-      const element = document.querySelector(selector);
-      log(`Year selector "${selector}":`, element ? element.textContent.trim() : 'not found');
-      if (element) {
-        const yearMatch = element.textContent.match(/(\d{4})/);
-        if (yearMatch) {
-          year = parseInt(yearMatch[1]);
-          log('Found year using selector:', selector, '-> year:', year);
-          break;
+    // Try all metadataProp elements to find one with a year
+    const metadataElements = document.querySelectorAll('rt-text[slot="metadataProp"], media-hero rt-text[slot="metadataProp"]');
+    for (const element of metadataElements) {
+      const text = element.textContent.trim();
+      log('Checking metadata element:', text);
+      const yearMatch = text.match(/(\d{4})/);
+      if (yearMatch) {
+        year = parseInt(yearMatch[1]);
+        log('Found year in metadata:', text, '-> year:', year);
+        break;
+      }
+    }
+    
+    // Fallback to other selectors if not found in metadata
+    if (!year) {
+      for (const selector of yearSelectors) {
+        const element = document.querySelector(selector);
+        log(`Year selector "${selector}":`, element ? element.textContent.trim() : 'not found');
+        if (element) {
+          const yearMatch = element.textContent.match(/(\d{4})/);
+          if (yearMatch) {
+            year = parseInt(yearMatch[1]);
+            log('Found year using selector:', selector, '-> year:', year);
+            break;
+          }
         }
       }
     }
@@ -141,13 +157,25 @@ class RTJellyseerrIntegration {
 
     // Try to find IMDB ID from links
     let imdbId = null;
-    const imdbLinks = document.querySelectorAll('a[href*="imdb.com/title/"]');
-    for (const link of imdbLinks) {
-      const match = link.href.match(/imdb\.com\/title\/(tt\d+)/);
-      if (match) {
-        imdbId = match[1];
-        break;
+    const imdbSelectors = [
+      'a[href*="imdb.com/title/"]',
+      'a[href*="imdb.com"]',
+      '[href*="imdb"]'
+    ];
+    
+    for (const selector of imdbSelectors) {
+      const imdbLinks = document.querySelectorAll(selector);
+      log(`Trying IMDB selector "${selector}":`, imdbLinks.length, 'links found');
+      for (const link of imdbLinks) {
+        log('Checking IMDB link:', link.href);
+        const match = link.href.match(/imdb\.com\/title\/(tt\d+)/);
+        if (match) {
+          imdbId = match[1];
+          log('Found IMDB ID:', imdbId, 'from link:', link.href);
+          break;
+        }
       }
+      if (imdbId) break;
     }
 
     // Extract additional metadata
