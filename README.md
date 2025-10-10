@@ -2,7 +2,7 @@
 
 A browser extension that seamlessly integrates with IMDB, Rotten Tomatoes, TheMovieDB, Letterboxd, Metacritic, and Trakt, allowing you to request movies and TV shows directly from these popular sites to your Jellyseerr server.
 
-![Version](https://img.shields.io/badge/version-1.4.0-blue)
+![Version](https://img.shields.io/badge/version-1.4.1-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Chrome](https://img.shields.io/badge/Chrome-Compatible-brightgreen)
 ![Firefox](https://img.shields.io/badge/Firefox-Compatible-brightgreen)

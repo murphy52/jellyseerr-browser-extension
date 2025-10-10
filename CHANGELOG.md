@@ -5,6 +5,26 @@ All notable changes to the Jellyseerr Request Button extension will be documente
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.1] - 2025-10-10 🔧 Bug Fixes + Monitoring Feature
+
+### ✨ Added
+- **Monitoring Indicator**: Shows if TV shows are being monitored for future releases (Issue #4)
+  - 📺 Visual indicator in flyout status text when TV shows are monitored
+  - Smart detection based on series status, air dates, and season completion
+  - Appears in both flyout status and tab tooltips for comprehensive feedback
+
+### 🐛 Fixed
+- **Server Configuration Reload**: Fixed Issue #1 where server config changes required extension reload
+  - Removed duplicate storage change listeners causing conflicts
+  - Enhanced automatic settings reload with detailed logging
+  - Added manual "Reload Settings" button in options page as fallback
+  - Settings changes now take effect immediately without extension reload
+
+### 🔧 Technical Improvements
+- Cleaned up background script storage listeners architecture
+- Enhanced debug logging for settings changes
+- Improved error handling and user feedback in options page
+
 ## [1.4.0] - 2025-10-10 🚀 MAJOR RELEASE - Trakt Integration + SPA Navigation
 
 ### ✨ Added
