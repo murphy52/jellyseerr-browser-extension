@@ -309,9 +309,14 @@ class IMDBJellyseerrIntegration {
         flyout.classList.remove('expanded');
         flyout.classList.add('collapsed');
       },
-      testConnection: async () => {
-        const result = await this.testConnection();
-        console.log('🔧 [Debug] Connection test result:', result);
+      testExtensionConnection: async () => {
+        const result = await this.testExtensionConnection();
+        console.log('🔧 [Debug] Extension connection test result:', result);
+        return result;
+      },
+      testServerConnection: async () => {
+        const result = await this.testServerConnection();
+        console.log('🔧 [Debug] Server connection test result:', result);
         return result;
       },
       updateTabStatus: (status) => this.updateTabStatus(status || 'available'),
@@ -550,9 +555,20 @@ class IMDBJellyseerrIntegration {
       
       for (let attempt = 1; attempt <= maxRetries; attempt++) {
         try {
-          // Test connection first
-          const connectionTest = await this.testConnection();
-          if (!connectionTest && attempt < maxRetries) {
+          // Test extension connection first
+          const extensionConnectionTest = await this.testExtensionConnection();
+          if (!extensionConnectionTest) {
+            if (attempt < maxRetries) {
+              await new Promise(r => setTimeout(r, retryDelay));
+              continue;
+            } else {
+              throw new Error('Extension background script not responding');
+            }
+          }
+          
+          // Test Jellyseerr server connection
+          const serverConnectionTest = await this.testServerConnection();
+          if (!serverConnectionTest && attempt < maxRetries) {
             await new Promise(r => setTimeout(r, retryDelay));
             continue;
           }
@@ -717,10 +733,10 @@ class IMDBJellyseerrIntegration {
           log(`Attempting to send message (attempt ${attempt}/${maxRetries})`);
           
           // First check if we can connect to the background script
-          const connectionTest = await this.testConnection();
-          if (!connectionTest) {
+          const extensionConnectionTest = await this.testExtensionConnection();
+          if (!extensionConnectionTest) {
             if (attempt < maxRetries) {
-              warn(`Connection test failed on attempt ${attempt}, retrying in ${retryDelay}ms...`);
+              warn(`Extension connection test failed on attempt ${attempt}, retrying in ${retryDelay}ms...`);
               await new Promise(resolve => setTimeout(resolve, retryDelay));
               continue;
             } else {
@@ -771,20 +787,42 @@ class IMDBJellyseerrIntegration {
     });
   }
   
-  async testConnection() {
+  async testExtensionConnection() {
     return new Promise((resolve) => {
       try {
         chrome.runtime.sendMessage({ action: 'ping' }, (response) => {
           if (chrome.runtime.lastError) {
-            log('Connection test failed:', chrome.runtime.lastError.message);
+            log('Extension connection test failed:', chrome.runtime.lastError.message);
             resolve(false);
           } else {
-            log('Connection test successful');
+            log('Extension connection test successful');
             resolve(true);
           }
         });
       } catch (error) {
-        log('Connection test error:', error);
+        log('Extension connection test error:', error);
+        resolve(false);
+      }
+    });
+  }
+  
+  async testServerConnection() {
+    return new Promise((resolve) => {
+      try {
+        chrome.runtime.sendMessage({ action: 'testConnection' }, (response) => {
+          if (chrome.runtime.lastError) {
+            log('Server connection test failed:', chrome.runtime.lastError.message);
+            resolve(false);
+          } else if (response && response.success) {
+            log('Server connection test successful:', response.data);
+            resolve(true);
+          } else {
+            log('Server connection test failed:', response ? response.error : 'No response');
+            resolve(false);
+          }
+        });
+      } catch (error) {
+        log('Server connection test error:', error);
         resolve(false);
       }
     });
