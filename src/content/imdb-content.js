@@ -214,37 +214,34 @@ class IMDBJellyseerrIntegration {
       this.button = null;
     }
 
-    // Comprehensive IMDB insertion points for different layouts (TV series vs movies)
+    // Simplified approach - avoid watchlist nesting by targeting broader containers first
     const insertionPoints = [
-      // PRIMARY: Watchlist area - highest priority for sidebar placement
-      '.ipc-btn--add-to-watchlist', // Add to Watchlist button
-      '[data-testid="tm-box-wl-button"]', // Watchlist button container
-      '.ipc-watchlist-ribbon', // Watchlist ribbon
-      '[class*="watchlist"]', // Any element with watchlist in class name
-      '[class*="wl-button"]', // Watchlist button variations
-      
-      // SECONDARY: Rating areas in sidebar
-      '[data-testid="hero-rating-bar__user-rating"]', // User rating section
-      '[data-testid="hero-rating-bar__watchlist"]', // Watchlist button area
-      '[data-testid="title-ratingWidget"]', // Rating widget
-      '[data-testid="hero-rating-bar"]', // Overall rating bar
-      
-      // TV Series specific - hero area selectors (higher priority)
-      '[data-testid="hero-title-block__user-rating"]', // User rating in hero
-      '[data-testid="hero-title-block__metadata"]', // Metadata area
+      // PRIMARY: Hero/metadata areas - avoid watchlist nesting issues
+      '[data-testid="hero-title-block__metadata"]', // Metadata area (try this first)
       '[data-testid="hero-title-block"]', // Main title block
       '[data-testid="hero-media"]', // Hero media section
       
-      // Movie specific selectors
-      '.titlereference-watch-ribbon', // Watch ribbon
+      // SECONDARY: Rating areas that are typically separate from watchlist
+      '[data-testid="hero-rating-bar"]', // Overall rating bar
+      '[data-testid="title-ratingWidget"]', // Rating widget
+      '[data-testid="hero-rating-bar__user-rating"]', // User rating section
       
-      // Content areas (broader selectors) - LOWER PRIORITY
+      // Try to find watchlist PARENT containers instead of watchlist itself
+      '[data-testid="hero-title-block__user-rating"]', // User rating in hero
+      
+      // Content areas (broader selectors)
       '[data-testid="title-overview-widget"]', // Overview widget
       '[data-testid="storyline-plot-summary"]', // Plot summary
       '[data-testid="title-details-section"]', // Details section
       
-      // Principal credits - MOVED TO LOW PRIORITY
+      // Principal credits - fallback
       '[data-testid="title-pc-principal-credit"]', // Principal credits (creators section)
+      
+      // LAST RESORT: Try watchlist selectors with special handling
+      '[data-testid="tm-box-wl-button"]', // Watchlist button container (with parent targeting)
+      '.ipc-btn--add-to-watchlist', // Add to Watchlist button
+      '.ipc-watchlist-ribbon', // Watchlist ribbon
+      '[class*="watchlist"]', // Any element with watchlist in class name
       
       // Page structure fallbacks
       '.ipc-page-grid', // Page grid
@@ -370,17 +367,22 @@ class IMDBJellyseerrIntegration {
       hasParent: !!container.parentNode
     });
     
-    // If we found the container using a watchlist selector, ALWAYS try to insert after it
+    // Check if this is any kind of interactive/button element that we should insert after
     const isWatchlistSelector = usedSelector && (
       usedSelector.includes('watchlist') ||
       usedSelector.includes('wl-button') ||
-      usedSelector.includes('ipc-btn--add-to-watchlist')
+      usedSelector.includes('ipc-btn--add-to-watchlist') ||
+      usedSelector.includes('tm-box')
     );
     
-    const shouldInsertAfter = isWatchlistSelector || 
+    const isInteractiveElement = 
       container.tagName === 'BUTTON' ||
       containerClass.includes('ipc-btn') ||
-      containerTestId.includes('watchlist');
+      containerTestId.includes('watchlist') ||
+      containerTestId.includes('rating') ||
+      containerClass.includes('rating');
+    
+    const shouldInsertAfter = isWatchlistSelector || isInteractiveElement;
     
     if (shouldInsertAfter && container.parentNode) {
       log('ATTEMPTING: Insert AFTER element (not inside)');
@@ -389,13 +391,13 @@ class IMDBJellyseerrIntegration {
       let targetContainer = container;
       let insertionParent = container.parentNode;
       
-      if (isWatchlistSelector) {
-        log('Watchlist selector detected - looking for better parent container');
+      if (shouldInsertAfter) {
+        log('Interactive/watchlist element detected - looking for better parent container');
         
         // Walk up to find a more appropriate parent (section, div with meaningful class, etc.)
         let current = container;
         let attempts = 0;
-        while (current.parentNode && attempts < 3) {
+        while (current.parentNode && attempts < 4) {
           const parent = current.parentNode;
           const parentClass = parent.className || '';
           const parentTestId = parent.getAttribute('data-testid') || '';
@@ -404,23 +406,43 @@ class IMDBJellyseerrIntegration {
             tagName: parent.tagName,
             className: parentClass.substring(0, 50),
             'data-testid': parentTestId,
-            hasMultipleChildren: parent.children.length > 1
+            hasMultipleChildren: parent.children.length > 1,
+            childrenCount: parent.children.length
           });
           
-          // If parent has multiple children or is a section/container, use it
-          if (parent.children.length > 1 || 
-              parent.tagName === 'SECTION' || 
-              parentClass.includes('section') ||
-              parentClass.includes('container') ||
-              parentTestId.includes('section')) {
+          // More aggressive criteria for finding a good parent
+          const isGoodParent = (
+            parent.children.length > 1 ||  // Has multiple children
+            parent.tagName === 'SECTION' ||
+            parent.tagName === 'ASIDE' ||
+            parentClass.includes('section') ||
+            parentClass.includes('container') ||
+            parentClass.includes('grid') ||
+            parentClass.includes('page') ||
+            parentTestId.includes('section') ||
+            parentTestId.includes('hero') ||
+            parentTestId.includes('title-block') ||
+            (parentClass.length > 10 && !parentClass.includes('btn')) // Long class names usually indicate containers
+          );
+          
+          if (isGoodParent) {
             targetContainer = current;
             insertionParent = parent;
-            log(`Using parent container for insertion:`, parent.tagName, parentClass.substring(0, 30));
+            log(`✅ Using parent container for insertion:`, {
+              tagName: parent.tagName,
+              className: parentClass.substring(0, 30),
+              'data-testid': parentTestId,
+              reason: 'Found suitable parent container'
+            });
             break;
           }
           
           current = parent;
           attempts++;
+        }
+        
+        if (targetContainer === container) {
+          log('⚠️ No better parent found, will use original element');
         }
       }
       
