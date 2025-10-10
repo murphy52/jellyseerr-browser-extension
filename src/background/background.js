@@ -424,12 +424,12 @@ class JellyseerrAPI {
       if (!bestMatch) {
         console.log('📊 [Background] ❌ No media found after trying all search terms');
         console.log('📊 [Background] Returning available status (not in database)');
-        return {
-          status: 'available',
-          message: 'Not requested - media not found in database',
-          buttonText: 'Request on Jellyseerr',
-          buttonClass: 'request'
-        };
+      return {
+        status: 'available',
+        message: 'Ready to request',
+        buttonText: 'Request on Jellyseerr',
+        buttonClass: 'request'
+      };
       }
       
       const tmdbId = parseInt(bestMatch.id);
@@ -450,7 +450,7 @@ class JellyseerrAPI {
       console.error('📊 [Background] Error stack:', error.stack);
       return {
         status: 'available',
-        message: 'Could not check media status: ' + error.message,
+        message: 'Connection issue',
         buttonText: 'Request on Jellyseerr',
         buttonClass: 'request'
       };
@@ -549,7 +549,7 @@ class JellyseerrAPI {
     if (!mediaDetails) {
       return {
         status: 'available',
-        message: 'Not requested',
+        message: 'Ready to request',
         buttonText: 'Request on Jellyseerr',
         buttonClass: 'request'
       };
@@ -662,31 +662,32 @@ class JellyseerrAPI {
     switch (numericStatus) {
       case 1: // Unknown
         result.status = 'unknown';
-        result.message = 'Status unknown';
+        result.message = 'Status unclear';
         result.buttonText = 'Request on Jellyseerr';
         result.buttonClass = 'request';
         break;
         
       case 2: // Pending
         result.status = 'pending';
-        result.message = 'Request pending approval';
+        result.message = 'Awaiting approval';
         result.buttonText = 'Request Pending';
         result.buttonClass = 'pending';
         break;
         
       case 3: // Processing/Downloading  
         result.status = 'downloading';
-        result.message = 'Currently downloading';
+        result.message = 'Download in progress';
         result.buttonText = 'Downloading...';
         result.buttonClass = 'downloading';
         break;
         
       case 4: // Partially Available
         result.status = 'partial';
-        result.message = 'Partially available';
+        result.message = 'Partially ready';
         result.buttonText = 'Partially Available';
         result.buttonClass = 'partial';
         if (mediaUrl) {
+          result.message = 'Available on Jellyfin';
           result.watchUrl = mediaUrl;
           result.buttonText = 'Watch on Jellyfin';
           result.buttonClass = 'watch';
@@ -695,7 +696,7 @@ class JellyseerrAPI {
         
       case 5: // Available
         result.status = 'available_watch';
-        result.message = 'Ready to watch!';
+        result.message = 'Available on Jellyfin';
         result.buttonText = 'Available';
         result.buttonClass = 'available';
         if (mediaUrl) {
@@ -709,7 +710,7 @@ class JellyseerrAPI {
         // Unrecognized status, assume available for request
         console.log('📊 [Background] Unknown status value:', status, 'treating as available');
         result.status = 'available';
-        result.message = 'Not requested';
+        result.message = 'Ready to request';
         result.buttonText = 'Request on Jellyseerr';
         result.buttonClass = 'request';
         break;

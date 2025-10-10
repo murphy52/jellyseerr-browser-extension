@@ -207,7 +207,7 @@ class UIComponents {
       </div>
       <div class="jellyseerr-status-indicator">
         <div class="jellyseerr-status-icon loading"></div>
-        <span class="jellyseerr-status-text">Checking status...</span>
+        <span class="jellyseerr-status-text">Connecting to Jellyseerr...</span>
       </div>
     `;
     
@@ -219,7 +219,7 @@ class UIComponents {
       <svg class="jellyseerr-button-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
       </svg>
-      <span>Checking status...</span>
+      <span>Connecting to Jellyseerr...</span>
     `;
     
     // Assemble panel
@@ -246,7 +246,7 @@ class UIComponents {
     // Update status indicator
     if (statusIcon && statusText) {
       statusIcon.className = `jellyseerr-status-icon ${statusData.status || 'loading'}`;
-      statusText.textContent = statusData.message || 'Checking status...';
+      statusText.textContent = statusData.message || 'Connecting to Jellyseerr...';
     }
     
     // Update action button
