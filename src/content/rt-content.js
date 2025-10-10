@@ -207,101 +207,124 @@ class RTJellyseerrIntegration {
     return null;
   }
 
-  addJellyseerrButton() {
-    log('Adding Jellyseerr button...');
-    if (this.button) {
-      log('Button already exists, skipping');
-      return; // Button already added
+  async addJellyseerrButton() {
+    log('Creating Jellyseerr fly-out tab for RT page...');
+    
+    // Remove existing fly-out if it exists
+    const existingFlyout = document.getElementById('jellyseerr-flyout');
+    if (existingFlyout) {
+      existingFlyout.remove();
+    }
+    
+    // Inject flyout CSS if not already present
+    if (!document.getElementById('jellyseerr-flyout-styles')) {
+      const styleElement = document.createElement('style');
+      styleElement.id = 'jellyseerr-flyout-styles';
+      styleElement.textContent = this.getFlyoutCSS();
+      document.head.appendChild(styleElement);
+      log('✅ Flyout CSS injected');
     }
 
-    // Find a good place to insert the button - updated for modern RT structure
-    const insertionPoints = [
-      'media-scorecard', // Modern RT media scorecard component
-      '.media-scorecard',
-      'media-hero', // Main hero section
-      '[data-qa="score-panel"]',
-      '.modules-wrap',
-      'main',
-      'div[id*="hero"]',
-      'div[id*="main"]'
-    ];
-    log('Trying insertion points:', insertionPoints);
-
-    let container = null;
-    for (const selector of insertionPoints) {
-      const element = document.querySelector(selector);
-      log(`Insertion point "${selector}":`, element ? 'found' : 'not found');
-      if (element) {
-        container = element;
-        log('Using insertion point:', selector);
-        break;
-      }
-    }
-
-    if (!container) {
-      warn('Could not find suitable container for Jellyseerr button');
-      log('Available elements on page:');
-      // Log some common RT elements to help debug
-      const debugSelectors = [
-        'media-scorecard', 'media-hero', '[data-qa]', 
-        '[class*="score"]', '[class*="rating"]', '[class*="media"]',
-        'h1', 'h2', 'main', 'section'
-      ];
-      debugSelectors.forEach(sel => {
-        const elements = document.querySelectorAll(sel);
-        if (elements.length > 0) {
-          log(`Found ${elements.length} elements matching "${sel}":`);
-          elements.forEach((el, i) => {
-            if (i < 3) { // Only log first 3 to avoid spam
-              const attrs = [];
-              if (el.className) attrs.push('class="' + el.className + '"');
-              if (el.id) attrs.push('id="' + el.id + '"');
-              if (el.getAttribute('data-qa')) attrs.push('data-qa="' + el.getAttribute('data-qa') + '"');
-              log(`  - ${el.tagName.toLowerCase()}${attrs.length ? ' ' + attrs.join(' ') : ''}`);
-            }
-          });
-        }
-      });
-      return;
-    }
-
-    // Create button container
-    const buttonContainer = document.createElement('div');
-    buttonContainer.className = 'jellyseerr-button-container';
-
-    // Create the button with loading state
-    this.button = document.createElement('button');
-    this.button.className = 'jellyseerr-request-button loading';
-    this.button.disabled = true;
-    this.button.innerHTML = `
-      <svg class="jellyseerr-button-icon" viewBox="0 0 24 24">
+    // Create the main fly-out container
+    const flyout = document.createElement('div');
+    flyout.id = 'jellyseerr-flyout';
+    flyout.className = 'jellyseerr-flyout collapsed';
+    
+    // Create the tab (always visible)
+    const tab = document.createElement('div');
+    tab.className = 'jellyseerr-tab';
+    tab.innerHTML = `
+      <svg class="jellyseerr-tab-icon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
       </svg>
-      Checking status...
+      <span class="jellyseerr-tab-text">Jellyseerr</span>
     `;
-
-    buttonContainer.appendChild(this.button);
     
-    // Insert after the container
-    container.parentNode.insertBefore(buttonContainer, container.nextSibling);
-
+    // Create the content panel (expandable)
+    const panel = document.createElement('div');
+    panel.className = 'jellyseerr-panel';
+    
+    // Create status section
+    const statusSection = document.createElement('div');
+    statusSection.className = 'jellyseerr-status-section';
+    statusSection.innerHTML = `
+      <div class="jellyseerr-media-info">
+        <h3 class="jellyseerr-title">${this.mediaData.title}</h3>
+        <p class="jellyseerr-year">${this.mediaData.year} • ${this.mediaData.mediaType === 'tv' ? 'TV Series' : 'Movie'}</p>
+      </div>
+      <div class="jellyseerr-status-indicator">
+        <div class="jellyseerr-status-icon loading"></div>
+        <span class="jellyseerr-status-text">Checking status...</span>
+      </div>
+    `;
+    
+    // Create action button
+    this.button = document.createElement('button');
+    this.button.className = 'jellyseerr-action-button loading';
+    this.button.disabled = true;
+    this.button.innerHTML = `
+      <svg class="jellyseerr-button-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+      </svg>
+      <span>Checking status...</span>
+    `;
+    
+    // Assemble the panel
+    panel.appendChild(statusSection);
+    panel.appendChild(this.button);
+    
+    // Assemble the flyout
+    flyout.appendChild(tab);
+    flyout.appendChild(panel);
+    
+    // Add click handler for tab
+    tab.addEventListener('click', () => {
+      flyout.classList.toggle('collapsed');
+      flyout.classList.toggle('expanded');
+      log('Flyout toggled:', flyout.classList.contains('expanded') ? 'expanded' : 'collapsed');
+    });
+    
+    // Add the flyout to the page
+    document.body.appendChild(flyout);
+    log('✅ Jellyseerr flyout added to page');
+    
+    // Store references
+    this.flyout = flyout;
+    this.statusIcon = statusSection.querySelector('.jellyseerr-status-icon');
+    this.statusText = statusSection.querySelector('.jellyseerr-status-text');
+    
     // Add page class for styling
     document.body.classList.add('rt-page');
-    
-    log('Jellyseerr button successfully added to RT page!');
-    log('Media data for this page:', this.mediaData);
     
     // Add debug functions to window for manual testing
     window.jellyseerr_debug = {
       testStatus: () => this.updateButtonWithStatus(),
       testAPI: () => this.debugAPI(),
-      mediaData: this.mediaData
+      mediaData: this.mediaData,
+      expandFlyout: () => {
+        flyout.classList.remove('collapsed');
+        flyout.classList.add('expanded');
+      },
+      collapseFlyout: () => {
+        flyout.classList.remove('expanded');
+        flyout.classList.add('collapsed');
+      },
+      getStatus: async () => {
+        try {
+          const status = await this.getMediaStatus(this.mediaData);
+          console.log('🔧 [Debug] Raw status from API:', status);
+          return status;
+        } catch (error) {
+          console.error('🔧 [Debug] Failed to get status:', error);
+          return error;
+        }
+      }
     };
     
     log('Debug functions added to window.jellyseerr_debug');
     
     // Check media status and update button
-    this.updateButtonWithStatus();
+    await this.updateButtonWithStatus();
   }
 
   async handleButtonClick() {
@@ -396,34 +419,50 @@ class RTJellyseerrIntegration {
     this.button.disabled = false;
     
     // Update button class and content based on status
-    this.button.className = `jellyseerr-request-button ${statusData.buttonClass || 'request'}`;
+    this.button.className = `jellyseerr-action-button ${statusData.buttonClass || 'request'}`;
     
     let iconPath = 'M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z'; // Default plus icon
+    let statusIconClass = 'available';
+    let statusText = statusData.message || 'Available to request';
     
-    // Choose appropriate icon based on status
+    // Choose appropriate icon and status indicator based on status
     switch (statusData.status) {
       case 'requested':
       case 'pending':
-        iconPath = 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z'; // Clock/pending icon
+        iconPath = 'M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M7,13H11V7H13V13H17V15H13V21H11V15H7V13Z'; // Clock/pending icon
+        statusIconClass = 'pending';
+        statusText = 'Request pending';
         break;
       case 'downloading':
         iconPath = 'M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z'; // Download icon
+        statusIconClass = 'downloading';
+        statusText = 'Downloading...';
         break;
       case 'available_watch':
       case 'partial':
+        statusIconClass = 'available';
         if (statusData.watchUrl) {
           iconPath = 'M8 5v14l11-7z'; // Play icon
+          statusText = 'Available to watch';
         } else {
           iconPath = 'M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'; // Check icon
+          statusText = 'Available';
         }
         break;
     }
     
+    // Update status indicator in the flyout
+    if (this.statusIcon && this.statusText) {
+      this.statusIcon.className = `jellyseerr-status-icon ${statusIconClass}`;
+      this.statusText.textContent = statusText;
+    }
+    
+    // Update main action button
     this.button.innerHTML = `
-      <svg class="jellyseerr-button-icon" viewBox="0 0 24 24">
+      <svg class="jellyseerr-button-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
         <path d="${iconPath}"/>
       </svg>
-      ${statusData.buttonText || 'Request on Jellyseerr'}
+      <span>${statusData.buttonText || 'Request on Jellyseerr'}</span>
     `;
     
     // Update click handler based on status
@@ -440,7 +479,7 @@ class RTJellyseerrIntegration {
       this.button.addEventListener('click', () => this.handleButtonClick());
     } else {
       // For other statuses, disable the button or make it informational
-      if (statusData.status === 'requested' || statusData.status === 'downloading') {
+      if (statusData.status === 'requested' || statusData.status === 'pending' || statusData.status === 'downloading') {
         this.button.disabled = true;
       }
     }
@@ -448,7 +487,7 @@ class RTJellyseerrIntegration {
     // Store status data for later use
     this.statusData = statusData;
     
-    log('Button updated with status:', statusData.status, statusData.buttonText);
+    log('Flyout updated with status:', statusData.status, statusData.buttonText);
   }
   
   async getMediaStatus(mediaData) {
@@ -638,6 +677,304 @@ class RTJellyseerrIntegration {
         notification.remove();
       }
     }, 5000);
+  }
+  
+  getFlyoutCSS() {
+    return `
+/* Jellyseerr Flyout Styles - Honey-inspired design */
+
+#jellyseerr-flyout {
+  position: fixed;
+  right: 0;
+  top: 25%;
+  transform: translateY(-50%);
+  z-index: 9999;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  max-width: 350px;
+  
+  /* Start collapsed - hide everything except the tab */
+  transform: translateY(-50%) translateX(100%);
+}
+
+#jellyseerr-flyout.expanded {
+  transform: translateY(-50%) translateX(0);
+}
+
+/* Tab - Always visible part */
+.jellyseerr-tab {
+  position: absolute;
+  left: -60px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 60px;
+  height: 120px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 8px 0 0 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: -2px 0 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s ease;
+  color: white;
+  user-select: none;
+}
+
+.jellyseerr-tab:hover {
+  background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+  transform: translateY(-50%) translateX(-4px);
+  box-shadow: -6px 0 16px rgba(0, 0, 0, 0.2);
+}
+
+.jellyseerr-tab-icon {
+  margin-bottom: 4px;
+  opacity: 0.9;
+}
+
+.jellyseerr-tab-text {
+  font-size: 11px;
+  font-weight: 600;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+/* Panel - Expandable content */
+.jellyseerr-panel {
+  width: 320px;
+  background: white;
+  border-radius: 8px 0 0 8px;
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+}
+
+/* Status Section */
+.jellyseerr-status-section {
+  padding: 20px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.jellyseerr-media-info {
+  margin-bottom: 16px;
+}
+
+.jellyseerr-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a202c;
+  margin: 0 0 4px 0;
+  line-height: 1.3;
+}
+
+.jellyseerr-year {
+  font-size: 14px;
+  color: #64748b;
+  margin: 0;
+  font-weight: 500;
+}
+
+/* Status Indicator */
+.jellyseerr-status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.jellyseerr-status-icon {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  position: relative;
+}
+
+.jellyseerr-status-icon.loading {
+  background: #cbd5e0;
+  animation: pulse 2s infinite;
+}
+
+.jellyseerr-status-icon.available {
+  background: #10b981;
+}
+
+.jellyseerr-status-icon.pending {
+  background: #f59e0b;
+}
+
+.jellyseerr-status-icon.downloading {
+  background: #3b82f6;
+  animation: pulse 1.5s infinite;
+}
+
+.jellyseerr-status-text {
+  font-size: 14px;
+  color: #475569;
+  font-weight: 500;
+}
+
+/* Action Button */
+.jellyseerr-action-button {
+  width: 100%;
+  padding: 14px 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 0 0 0 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.jellyseerr-action-button:hover:not(:disabled) {
+  background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.jellyseerr-action-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.jellyseerr-action-button:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.jellyseerr-action-button.loading {
+  background: #9ca3af;
+  cursor: wait;
+}
+
+.jellyseerr-action-button.success {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.jellyseerr-action-button.error {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+}
+
+.jellyseerr-action-button.request {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.jellyseerr-action-button.watch {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.jellyseerr-button-icon {
+  flex-shrink: 0;
+}
+
+/* Loading Animation */
+.jellyseerr-action-button.loading .jellyseerr-button-icon {
+  animation: spin 1s linear infinite;
+}
+
+/* Animations */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Dark mode support for RT's dark theme */
+@media (prefers-color-scheme: dark) {
+  .jellyseerr-panel {
+    background: #1f2937;
+    border-color: #374151;
+  }
+  
+  .jellyseerr-title {
+    color: #f9fafb;
+  }
+  
+  .jellyseerr-year {
+    color: #9ca3af;
+  }
+  
+  .jellyseerr-status-text {
+    color: #d1d5db;
+  }
+  
+  .jellyseerr-status-section {
+    border-bottom-color: #374151;
+  }
+}
+
+/* Responsive behavior */
+@media (max-width: 768px) {
+  #jellyseerr-flyout {
+    transform: translateY(-50%) translateX(100%);
+    max-width: 300px;
+  }
+  
+  .jellyseerr-tab {
+    left: -50px;
+    width: 50px;
+    height: 100px;
+  }
+  
+  .jellyseerr-panel {
+    width: 280px;
+  }
+  
+  .jellyseerr-tab-text {
+    font-size: 10px;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .jellyseerr-tab {
+    border: 2px solid #000;
+  }
+  
+  .jellyseerr-panel {
+    border: 2px solid #000;
+  }
+  
+  .jellyseerr-action-button {
+    border: 1px solid #000;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  #jellyseerr-flyout,
+  .jellyseerr-tab,
+  .jellyseerr-action-button {
+    transition: none;
+  }
+  
+  .jellyseerr-status-icon.loading,
+  .jellyseerr-status-icon.downloading,
+  .jellyseerr-action-button.loading .jellyseerr-button-icon {
+    animation: none;
+  }
+}
+    `;
   }
 }
 
