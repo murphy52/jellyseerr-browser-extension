@@ -234,11 +234,14 @@ class RTJellyseerrIntegration {
     const tab = document.createElement('div');
     tab.className = 'jellyseerr-tab';
     tab.innerHTML = `
-      <svg class="jellyseerr-tab-icon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+      <svg class="jellyseerr-tab-icon jellyseerr-connection-status grey" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
       </svg>
       <span class="jellyseerr-tab-text">Jellyseerr</span>
     `;
+    
+    // Store reference to the connection status icon
+    this.connectionStatusIcon = tab.querySelector('.jellyseerr-connection-status');
     
     // Create the content panel (expandable)
     const panel = document.createElement('div');
@@ -309,6 +312,12 @@ class RTJellyseerrIntegration {
         flyout.classList.remove('expanded');
         flyout.classList.add('collapsed');
       },
+      testConnection: async () => {
+        const result = await this.testConnection();
+        console.log('🔧 [Debug] Connection test result:', result);
+        return result;
+      },
+      updateConnectionStatus: () => this.updateConnectionStatus(),
       getStatus: async () => {
         try {
           const status = await this.getMediaStatus(this.mediaData);
@@ -322,6 +331,9 @@ class RTJellyseerrIntegration {
     };
     
     log('Debug functions added to window.jellyseerr_debug');
+    
+    // Check connection status and update tab icon
+    await this.updateConnectionStatus();
     
     // Check media status and update button
     await this.updateButtonWithStatus();
@@ -403,6 +415,29 @@ class RTJellyseerrIntegration {
       setTimeout(async () => {
         await this.updateButtonWithStatus();
       }, 3000);
+    }
+  }
+  
+  async updateConnectionStatus() {
+    if (!this.connectionStatusIcon) return;
+    
+    try {
+      // Test connection to Jellyseerr server
+      const isConnected = await this.testConnection();
+      
+      if (isConnected) {
+        // Green - connected
+        this.connectionStatusIcon.className = 'jellyseerr-tab-icon jellyseerr-connection-status green';
+        log('✅ Connection to Jellyseerr server: OK');
+      } else {
+        // Red - disconnected
+        this.connectionStatusIcon.className = 'jellyseerr-tab-icon jellyseerr-connection-status red';
+        warn('❌ Connection to Jellyseerr server: FAILED');
+      }
+    } catch (error) {
+      // Red - error
+      this.connectionStatusIcon.className = 'jellyseerr-tab-icon jellyseerr-connection-status red';
+      error('❌ Connection test error:', error);
     }
   }
   
@@ -746,6 +781,19 @@ class RTJellyseerrIntegration {
 .jellyseerr-tab-icon {
   margin-bottom: 4px;
   opacity: 0.9;
+}
+
+/* Connection status colors for tab icon */
+.jellyseerr-connection-status.grey {
+  color: #9ca3af !important;
+}
+
+.jellyseerr-connection-status.red {
+  color: #ef4444 !important;
+}
+
+.jellyseerr-connection-status.green {
+  color: #10b981 !important;
 }
 
 .jellyseerr-tab-text {
