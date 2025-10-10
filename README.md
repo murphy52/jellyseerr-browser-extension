@@ -1,23 +1,24 @@
 # Jellyseerr Request Button Browser Extension
 
-A browser extension that seamlessly integrates with IMDB and Rotten Tomatoes, allowing you to request movies and TV shows directly from these popular sites to your Jellyseerr server.
+A browser extension that seamlessly integrates with IMDB, Rotten Tomatoes, and TheMovieDB, allowing you to request movies and TV shows directly from these popular sites to your Jellyseerr server.
 
-![Version](https://img.shields.io/badge/version-1.0.4-blue)
+![Version](https://img.shields.io/badge/version-1.1.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Chrome](https://img.shields.io/badge/Chrome-Compatible-brightgreen)
 ![Firefox](https://img.shields.io/badge/Firefox-Compatible-brightgreen)
 
 ## ✨ Features
 
-- 🎬 **IMDB Integration**: Adds intelligent request flyout to movie and TV show pages
+- 🎬 **IMDB Integration**: Adds intelligent request buttons to movie and TV show pages
 - 🍅 **Rotten Tomatoes Integration**: Modern flyout interface with status indicators
+- 🎭 **TheMovieDB Integration**: NEW! Flyout interface with TMDb's signature blue theme
 - 🔍 **Smart Media Matching**: Advanced search with fallback terms for accurate matching
 - 📊 **Real-time Status**: Shows current request status (Available, Pending, Downloading, etc.)
-- 🎨 **Modern UI**: Beautiful flyout design inspired by modern web apps
+- 🏗️ **Modern Architecture**: Built with shared libraries for easy expansion to new sites
 - ⚡ **Fast Performance**: Lightweight and optimized for quick loading
 - 🔧 **Easy Configuration**: Simple setup through extension options
 - 🔄 **Auto-retry**: Intelligent retry logic for network issues
-- 🎯 **Precise Matching**: Uses title, year, and metadata for accurate identification
+- 🎯 **Perfect Database Alignment**: TMDb integration provides the most accurate matching since Jellyseerr uses TMDb as its data source
 
 ## Installation
 
@@ -65,6 +66,14 @@ A browser extension that seamlessly integrates with IMDB and Rotten Tomatoes, al
    - 🔵 **Blue**: Currently downloading
    - 🔴 **Red**: Error or connection issue
 
+### TheMovieDB (NEW!)
+1. Navigate to any movie or TV show page on TheMovieDB (e.g., `themoviedb.org/movie/12345`)
+2. Look for the **Jellyseerr flyout tab** with TMDb's signature blue theme on the right side
+3. Click the tab to expand the flyout panel
+4. Enjoy **perfect matching** since TMDb is Jellyseerr's primary data source
+5. The flyout provides the same status indicators as Rotten Tomatoes
+6. **Best accuracy**: TMDb integration offers the most reliable matching and requesting
+
 ## 🖼️ Screenshots
 
 ### Rotten Tomatoes Integration
@@ -80,6 +89,7 @@ A browser extension that seamlessly integrates with IMDB and Rotten Tomatoes, al
 
 - **IMDB**: All movie and TV show pages (`imdb.com/title/*`)
 - **Rotten Tomatoes**: Movie pages (`rottentomatoes.com/m/*`) and TV pages (`rottentomatoes.com/tv/*`)
+- **TheMovieDB**: Movie pages (`themoviedb.org/movie/*`) and TV pages (`themoviedb.org/tv/*`) ⭐ **Most Accurate**
 
 ## File Structure
 
@@ -118,6 +128,7 @@ jellyseerr-browser-extension/
 ### Extension Not Appearing
 - **IMDB**: Make sure you're on a specific title page (`/title/tt*`), not search results
 - **Rotten Tomatoes**: Look for the flyout tab on the right side; try refreshing if not visible
+- **TheMovieDB**: Look for the blue-themed flyout tab on the right side of movie/TV pages
 - Ensure the extension is enabled in your browser's extension manager
 - Check that you're on supported page URLs
 
@@ -166,6 +177,14 @@ jellyseerr-browser-extension/
 - **Manifest V3**: Uses latest extension API standards
 
 ## 📋 Changelog
+
+### v1.1.0 - TheMovieDB Integration 🎆
+- ✨ **NEW SITE**: Complete TheMovieDB.org integration with flyout interface
+- 🏗️ **Shared Architecture**: Built new modular system with shared libraries
+- 🔵 **TMDb Blue Theme**: Custom blue gradient design matching TMDb brand
+- 🎯 **Perfect Matching**: Most accurate requests since TMDb is Jellyseerr's data source
+- 🔧 **Modular Design**: Easier to add new sites in the future
+- 📄 **Future-Ready**: BaseIntegration class enables rapid expansion
 
 ### v1.0.4 (Stable Release)
 - ✨ **Rotten Tomatoes**: Complete redesign with modern flyout interface

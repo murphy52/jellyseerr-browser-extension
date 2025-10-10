@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Jellyseerr Request Button",
-  "version": "1.0.4",
-  "description": "Add movies and TV shows to Jellyseerr directly from IMDB and Rotten Tomatoes",
+  "version": "1.1.0",
+  "description": "Add movies and TV shows to Jellyseerr directly from IMDB, Rotten Tomatoes, and TheMovieDB",
   "permissions": [
     "storage",
     "activeTab"
@@ -12,6 +12,8 @@
     "https://imdb.com/*",
     "https://www.rottentomatoes.com/*",
     "https://rottentomatoes.com/*",
+    "https://www.themoviedb.org/*",
+    "https://themoviedb.org/*",
     "http://localhost/*",
     "https://*/*"
   ],
@@ -34,6 +36,22 @@
       ],
       "js": ["src/content/rt-content.js"],
       "css": ["src/content/content-styles.css"],
+      "run_at": "document_end"
+    },
+    {
+      "matches": [
+        "https://www.themoviedb.org/movie/*",
+        "https://themoviedb.org/movie/*",
+        "https://www.themoviedb.org/tv/*",
+        "https://themoviedb.org/tv/*"
+      ],
+      "js": [
+        "src/shared/JellyseerrClient.js",
+        "src/shared/MediaExtractor.js",
+        "src/shared/UIComponents.js",
+        "src/shared/BaseIntegration.js",
+        "src/content/tmdb-integration.js"
+      ],
       "run_at": "document_end"
     }
   ],
