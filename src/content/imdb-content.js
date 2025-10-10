@@ -263,6 +263,16 @@ class IMDBJellyseerrIntegration {
       if (element) {
         container = element;
         log('Using insertion point:', selector);
+        
+        // DEBUG: Log container details
+        log('Container details:', {
+          tagName: element.tagName,
+          className: element.className,
+          'data-testid': element.getAttribute('data-testid'),
+          id: element.id,
+          textContent: element.textContent?.substring(0, 50) + '...'
+        });
+        
         break;
       }
     }
@@ -347,57 +357,52 @@ class IMDBJellyseerrIntegration {
     buttonContainer.appendChild(this.button);
     log('Button element created successfully');
     
-    // Smart insertion logic based on container type
-    const containerTestId = container.getAttribute('data-testid');
+    // Smart insertion logic based on what selector we found
+    const containerTestId = container.getAttribute('data-testid') || '';
     const containerClass = container.className || '';
+    const usedSelector = insertionPoints[insertionPoints.findIndex(sel => document.querySelector(sel) === container)];
     
-    // Check if this is a watchlist button or similar interactive element
-    const isWatchlistButton = (
-      containerClass.includes('watchlist') ||
-      containerClass.includes('wl-button') ||
-      containerTestId && (
-        containerTestId.includes('watchlist') ||
-        containerTestId.includes('wl-button') ||
-        containerTestId.includes('tm-box')
-      ) ||
+    log('DEBUG: Insertion analysis:', {
+      usedSelector,
+      containerTestId,
+      containerClass,
+      tagName: container.tagName,
+      hasParent: !!container.parentNode
+    });
+    
+    // If we found the container using a watchlist selector, ALWAYS try to insert after it
+    const isWatchlistSelector = usedSelector && (
+      usedSelector.includes('watchlist') ||
+      usedSelector.includes('wl-button') ||
+      usedSelector.includes('ipc-btn--add-to-watchlist')
+    );
+    
+    const shouldInsertAfter = isWatchlistSelector || 
       container.tagName === 'BUTTON' ||
-      container.classList.contains('ipc-btn')
-    );
+      containerClass.includes('ipc-btn') ||
+      containerTestId.includes('watchlist');
     
-    const isRatingElement = (
-      containerTestId && (
-        containerTestId.includes('rating') ||
-        containerTestId.includes('user-rating')
-      )
-    );
-    
-    if (isWatchlistButton || isRatingElement) {
-      // For interactive elements (buttons, ratings), insert AFTER the element to stay in same area
-      if (container.parentNode) {
+    if (shouldInsertAfter && container.parentNode) {
+      log('ATTEMPTING: Insert AFTER element (not inside)');
+      try {
         container.parentNode.insertBefore(buttonContainer, container.nextSibling);
-        log('Inserted button after interactive element (watchlist/rating)');
-      } else {
-        // Fallback: try to find the parent container
-        const parentContainer = container.closest('[data-testid], .ipc-page-section, section, div');
-        if (parentContainer && parentContainer !== container) {
-          parentContainer.appendChild(buttonContainer);
-          log('Inserted button in parent container as fallback');
-        } else {
-          container.appendChild(buttonContainer);
-          log('Inserted button inside element as last resort');
-        }
+        log('✅ SUCCESS: Inserted button after element');
+      } catch (e) {
+        log('❌ FAILED to insert after, trying inside:', e.message);
+        container.appendChild(buttonContainer);
       }
     } else {
-      // For other containers (metadata, content areas), append inside
+      log('ATTEMPTING: Insert INSIDE element');
       container.appendChild(buttonContainer);
-      log('Inserted button inside container');
+      log('✅ SUCCESS: Inserted button inside container');
     }
     
-    log('Button container placement:', {
-      container: containerTestId || containerClass || container.tagName,
-      isWatchlistButton,
-      isRatingElement,
-      method: isWatchlistButton || isRatingElement ? 'after' : 'inside'
+    log('Final placement decision:', {
+      usedSelector,
+      isWatchlistSelector,
+      shouldInsertAfter,
+      actualMethod: shouldInsertAfter ? 'AFTER' : 'INSIDE',
+      parentExists: !!container.parentNode
     });
     
     // Verify button was inserted
