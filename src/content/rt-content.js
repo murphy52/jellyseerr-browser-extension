@@ -75,8 +75,9 @@ class RTJellyseerrIntegration {
       log(`Selector "${selector}":`, element ? element.textContent.trim() : 'not found');
       if (element) {
         title = element.textContent.trim();
-        // Remove common suffixes and clean up
-        title = title.replace(/\s*–\s*Season\s+\d+/i, ''); // Remove season info
+        // Remove common prefixes and suffixes and clean up
+        title = title.replace(/^Season\s+\d+\s*–\s*/i, ''); // Remove season prefix
+        title = title.replace(/\s*–\s*Season\s+\d+/i, ''); // Remove season suffix
         title = title.replace(/\s*\(\d{4}\)\s*$/, ''); // Remove year
         title = title.replace(/\s*–\s*Chad Powers$/i, ''); // Remove redundant series name
         log('Found title using selector:', selector, '-> title:', title);
@@ -427,16 +428,16 @@ class RTJellyseerrIntegration {
       
       if (isConnected) {
         // Green - connected
-        this.connectionStatusIcon.className = 'jellyseerr-tab-icon jellyseerr-connection-status green';
+        this.connectionStatusIcon.setAttribute('class', 'jellyseerr-tab-icon jellyseerr-connection-status green');
         log('✅ Connection to Jellyseerr server: OK');
       } else {
         // Red - disconnected
-        this.connectionStatusIcon.className = 'jellyseerr-tab-icon jellyseerr-connection-status red';
+        this.connectionStatusIcon.setAttribute('class', 'jellyseerr-tab-icon jellyseerr-connection-status red');
         warn('❌ Connection to Jellyseerr server: FAILED');
       }
     } catch (error) {
       // Red - error
-      this.connectionStatusIcon.className = 'jellyseerr-tab-icon jellyseerr-connection-status red';
+      this.connectionStatusIcon.setAttribute('class', 'jellyseerr-tab-icon jellyseerr-connection-status red');
       error('❌ Connection test error:', error);
     }
   }

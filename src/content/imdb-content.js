@@ -344,16 +344,16 @@ class IMDBJellyseerrIntegration {
       
       if (isConnected) {
         // Green - connected
-        this.connectionStatusIcon.className = 'jellyseerr-tab-icon jellyseerr-connection-status green';
+        this.connectionStatusIcon.setAttribute('class', 'jellyseerr-tab-icon jellyseerr-connection-status green');
         log('✅ Connection to Jellyseerr server: OK');
       } else {
         // Red - disconnected
-        this.connectionStatusIcon.className = 'jellyseerr-tab-icon jellyseerr-connection-status red';
+        this.connectionStatusIcon.setAttribute('class', 'jellyseerr-tab-icon jellyseerr-connection-status red');
         warn('❌ Connection to Jellyseerr server: FAILED');
       }
     } catch (error) {
       // Red - error
-      this.connectionStatusIcon.className = 'jellyseerr-tab-icon jellyseerr-connection-status red';
+      this.connectionStatusIcon.setAttribute('class', 'jellyseerr-tab-icon jellyseerr-connection-status red');
       error('❌ Connection test error:', error);
     }
   }
