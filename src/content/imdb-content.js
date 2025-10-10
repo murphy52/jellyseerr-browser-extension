@@ -214,26 +214,38 @@ class IMDBJellyseerrIntegration {
       this.button = null;
     }
 
-    // Target IMDB right sidebar area - where interactive elements belong
+    // Comprehensive IMDB insertion points for different layouts (TV series vs movies)
     const insertionPoints = [
-      // PRIMARY: Right sidebar - where "Add to Watchlist", ratings, etc. are located
-      '[data-testid="hero-rating-bar__user-rating"]', // User rating section in sidebar
+      // PRIMARY: Right sidebar - watchlist and rating areas
+      '[data-testid="hero-rating-bar__user-rating"]', // User rating section
       '[data-testid="hero-rating-bar__watchlist"]', // Watchlist button area
-      '[data-testid="title-ratingWidget"]', // Rating widget area
+      '[data-testid="title-ratingWidget"]', // Rating widget
+      '[data-testid="hero-rating-bar"]', // Overall rating bar
       
-      // Secondary: Other right sidebar elements
-      '[data-testid="hero-title-block__user-rating"]', // User rating in hero block
-      '.ipc-watchlist-ribbon', // Watchlist ribbon element
+      // TV Series specific selectors
+      '[data-testid="hero-title-block__user-rating"]', // User rating in hero
+      '[data-testid="hero-title-block__metadata"]', // Metadata area
+      '[data-testid="title-pc-principal-credit"]', // Principal credits
       
-      // Tertiary: General sidebar areas
-      '[data-testid="hero-rating-bar"]', // Rating bar section
-      '[data-testid="hero-title-block__metadata"]', // Title metadata area
+      // Movie specific selectors
+      '.ipc-watchlist-ribbon', // Watchlist ribbon
+      '.titlereference-watch-ribbon', // Watch ribbon
       
-      // Fallback: Main content areas (less ideal)
+      // General hero/header areas
+      '[data-testid="hero-title-block"]', // Main title block
+      '[data-testid="hero-media"]', // Hero media section
+      
+      // Content areas (broader selectors)
       '[data-testid="title-overview-widget"]', // Overview widget
+      '[data-testid="storyline-plot-summary"]', // Plot summary
       '[data-testid="title-details-section"]', // Details section
-      '.ipc-page-grid', // Page grid container
-      '.ipc-page-content-container' // Main content container
+      
+      // Page structure fallbacks
+      '.ipc-page-grid', // Page grid
+      '.ipc-page-content-container', // Content container
+      '.titlereference-section-overview', // Legacy overview
+      '.title_wrapper', // Legacy title wrapper
+      'main' // HTML5 main element
     ];
     
     log('Trying insertion points:', insertionPoints);
@@ -251,33 +263,55 @@ class IMDBJellyseerrIntegration {
 
     if (!container) {
       warn('Could not find suitable container for Jellyseerr button');
-      log('Available elements on page:');
+      log('Debugging page layout - URL:', window.location.href);
+      log('Page title:', document.title);
       
-      // Enhanced debugging - log common IMDB elements
+      // Enhanced debugging - log specific IMDB elements we're looking for
       const debugSelectors = [
-        '[data-testid]', '[class*="title"]', '[class*="hero"]',
-        '[class*="details"]', '[class*="metadata"]', '[class*="rating"]',
-        'section', 'main', '.ipc-page-content-container'
+        // Test our specific selectors
+        '[data-testid*="hero"]', 
+        '[data-testid*="rating"]',
+        '[data-testid*="watchlist"]',
+        '[data-testid*="title"]',
+        '[data-testid*="metadata"]',
+        '.ipc-page-grid',
+        '.ipc-page-content-container',
+        'main'
       ];
       
+      log('Testing our insertion point selectors:');
       debugSelectors.forEach(sel => {
         const elements = document.querySelectorAll(sel);
-        if (elements.length > 0 && elements.length < 20) { // Don't spam with too many
-          log(`Found ${elements.length} elements matching "${sel}":`);
+        if (elements.length > 0) {
+          log(`✓ Found ${elements.length} elements matching "${sel}"`);
           elements.forEach((el, i) => {
             if (i < 3) { // Only log first 3
-              const attrs = [];
-              if (el.className) attrs.push('class="' + el.className.split(' ').slice(0, 2).join(' ') + '..."');
-              if (el.getAttribute('data-testid')) attrs.push('data-testid="' + el.getAttribute('data-testid') + '"');
-              log(`  - ${el.tagName.toLowerCase()}${attrs.length ? ' ' + attrs.join(' ') : ''}`);
+              const testId = el.getAttribute('data-testid');
+              const classes = el.className.split(' ').slice(0, 3).join(' ');
+              log(`  - ${el.tagName.toLowerCase()} ${testId ? `data-testid="${testId}"` : ''} ${classes ? `class="${classes}..."` : ''}`);
             }
           });
+        } else {
+          log(`✗ No elements found for "${sel}"`);
         }
       });
       
-      // Reset button reference since we couldn't insert it
-      this.button = null;
-      return;
+      // Try to find ANY reasonable container as emergency fallback
+      const emergencyContainers = ['main', 'body', '.ipc-page-content-container', '#__next'];
+      for (const sel of emergencyContainers) {
+        const emergency = document.querySelector(sel);
+        if (emergency) {
+          warn(`Using emergency container: ${sel}`);
+          container = emergency;
+          break;
+        }
+      }
+      
+      if (!container) {
+        error('No container found at all - cannot insert button');
+        this.button = null;
+        return;
+      }
     }
 
     // Create button container with sidebar-appropriate styling
