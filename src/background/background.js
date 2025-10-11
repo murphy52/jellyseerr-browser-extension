@@ -700,6 +700,64 @@ class JellyseerrAPI {
         result.message = 'Download in progress';
         result.buttonText = 'Downloading...';
         result.buttonClass = 'downloading';
+        
+        // Debug logging for Issue #6: Download progress investigation
+        console.log('🔍 [DEBUG] DOWNLOADING STATUS DETECTED - Investigating available data for Issue #6');
+        console.log('🔍 [DEBUG] Full mediaDetails object:', JSON.stringify(mediaDetails, null, 2));
+        
+        // Check for potential progress fields
+        const progressFields = ['progress', 'percentage', 'downloadProgress', 'completion', 'percent'];
+        const speedFields = ['speed', 'downloadSpeed', 'rate', 'transferRate'];
+        const etaFields = ['eta', 'timeRemaining', 'estimatedCompletion', 'remainingTime'];
+        const clientFields = ['downloadClient', 'downloader', 'client'];
+        
+        progressFields.forEach(field => {
+          if (mediaDetails[field] !== undefined) {
+            console.log(`🔍 [DEBUG] Found progress field '${field}':`, mediaDetails[field]);
+            result.progress = mediaDetails[field];
+          }
+        });
+        
+        speedFields.forEach(field => {
+          if (mediaDetails[field] !== undefined) {
+            console.log(`🔍 [DEBUG] Found speed field '${field}':`, mediaDetails[field]);
+            result.downloadSpeed = mediaDetails[field];
+          }
+        });
+        
+        etaFields.forEach(field => {
+          if (mediaDetails[field] !== undefined) {
+            console.log(`🔍 [DEBUG] Found ETA field '${field}':`, mediaDetails[field]);
+            result.eta = mediaDetails[field];
+          }
+        });
+        
+        clientFields.forEach(field => {
+          if (mediaDetails[field] !== undefined) {
+            console.log(`🔍 [DEBUG] Found client field '${field}':`, mediaDetails[field]);
+            result.downloadClient = mediaDetails[field];
+          }
+        });
+        
+        // Check media sub-object for additional fields
+        if (mediaDetails.media) {
+          console.log('🔍 [DEBUG] Checking media sub-object for progress data...');
+          [...progressFields, ...speedFields, ...etaFields, ...clientFields].forEach(field => {
+            if (mediaDetails.media[field] !== undefined) {
+              console.log(`🔍 [DEBUG] Found media.${field}:`, mediaDetails.media[field]);
+            }
+          });
+        }
+        
+        // Check if we found any progress info and enhance the UI
+        if (result.progress !== undefined) {
+          result.message = `Download in progress (${result.progress}%)`;
+          result.buttonText = `Downloading ${result.progress}%`;
+          console.log('🔍 [DEBUG] Enhanced downloading status with progress:', result);
+        } else {
+          console.log('🔍 [DEBUG] No progress data found - using basic downloading status');
+        }
+        
         break;
         
       case 4: // Partially Available
