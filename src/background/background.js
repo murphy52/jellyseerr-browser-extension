@@ -697,8 +697,8 @@ class JellyseerrAPI {
         
       case 3: // Processing/Downloading  
         result.status = 'downloading';
-        result.message = 'Download in progress';
-        result.buttonText = 'Downloading...';
+        result.message = 'Processing download (detailed progress not available)';
+        result.buttonText = 'Processing...';
         result.buttonClass = 'downloading';
         
         // Debug logging for Issue #6: Download progress investigation

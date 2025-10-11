@@ -175,6 +175,25 @@ jellyseerr-browser-extension/
 5. **Status Monitoring**: Real-time status checking with monitoring indicators for TV shows
 6. **Request Submission**: Submits request to Jellyseerr with proper media ID and user preferences
 
+## 📊 Status Information
+
+### Available Status Types
+The extension shows real-time status for your media requests:
+- 🟢 **Available**: Ready to request
+- 🟡 **Pending**: Request awaiting approval
+- 🔵 **Processing**: Download in progress (see limitations below)
+- 🟢 **Ready**: Available to watch on Jellyfin
+- 🔴 **Error**: Connection or request failed
+
+### Download Progress Limitations
+**Important**: When content shows "Processing...", it means your request has been sent to Radarr/Sonarr and is being downloaded. However, due to API architecture limitations:
+
+- ❌ **No progress percentage**: Jellyseerr doesn't receive detailed progress from Radarr/Sonarr
+- ❌ **No download speed**: Speed information is not available through the API
+- ❌ **No ETA**: Estimated completion time is not provided
+
+This is a limitation of the Jellyseerr → Radarr/Sonarr integration chain, not the extension itself. For detailed download progress tracking, consider tools like [Monitarr](https://github.com/Boerngine/Monitarr).
+
 ## 🔧 Troubleshooting
 
 ### Extension Not Appearing
