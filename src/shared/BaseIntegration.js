@@ -31,6 +31,7 @@ class BaseIntegration {
     this.uiElements = {};
     this.currentUrl = window.location.href;
     this.navigationListener = null;
+    this.currentStatusData = null; // Cache current status data for performance
     
     this.log('BaseIntegration initialized for', this.siteName);
   }
@@ -206,6 +207,9 @@ class BaseIntegration {
       const statusData = await this.client.getMediaStatus(this.mediaData);
       this.log('Status received:', statusData);
       
+      // Cache status data for instant access during button clicks
+      this.currentStatusData = statusData;
+      
       // Update UI based on theme
       if (this.uiTheme === 'flyout') {
         this.ui.updateFlyoutStatus(this.uiElements, statusData);
@@ -246,6 +250,102 @@ class BaseIntegration {
 
     this.log('Handling request for:', this.mediaData.title);
 
+    // Check if this is a "Watch on Jellyfin" button click
+    const currentButton = this.uiTheme === 'flyout' ? this.uiElements.button : this.uiElements.button;
+    const buttonText = currentButton ? currentButton.querySelector('span')?.textContent : '';
+    const isWatchButton = buttonText === 'Watch on Jellyfin' || currentButton?.classList.contains('watch');
+    
+    this.log('Button analysis:', {
+      buttonText,
+      hasWatchClass: currentButton?.classList.contains('watch'),
+      isWatchButton
+    });
+
+    // If it's a "Watch on Jellyfin" button, use cached watch URL for instant response
+    if (isWatchButton) {
+      this.log('Detected Watch on Jellyfin button click');
+      
+      // First show immediate loading state
+      if (this.uiTheme === 'flyout') {
+        this.ui.updateFlyoutStatus(this.uiElements, {
+          status: 'loading',
+          message: `Opening "${this.mediaData.title}" on Jellyfin...`,
+          buttonText: 'Opening...',
+          disabled: true
+        });
+      } else {
+        this.ui.updateButtonStatus(this.uiElements.button, {
+          status: 'loading',
+          buttonText: 'Opening...',
+          disabled: true
+        });
+      }
+      
+      // Check if we have cached status data with watch URL
+      if (this.currentStatusData && this.currentStatusData.watchUrl) {
+        this.log('Using cached watch URL:', this.currentStatusData.watchUrl);
+        
+        // Open immediately with cached URL
+        setTimeout(() => {
+          window.open(this.currentStatusData.watchUrl, '_blank');
+          
+          // Show success notification
+          this.ui.createNotification(
+            'Opening Jellyfin',
+            `Opening "${this.mediaData.title}" on Jellyfin`,
+            'success',
+            3000
+          );
+          
+          // Reset button state after a short delay
+          setTimeout(() => {
+            if (this.currentStatusData) {
+              if (this.uiTheme === 'flyout') {
+                this.ui.updateFlyoutStatus(this.uiElements, this.currentStatusData);
+              } else {
+                this.ui.updateButtonStatus(this.uiElements.button, this.currentStatusData);
+              }
+            }
+          }, 500);
+        }, 100); // Very short delay for visual feedback
+        
+        return; // Exit early - we opened Jellyfin
+      } else {
+        // No cached watch URL, fall back to API call (shouldn't normally happen)
+        this.log('No cached watch URL, falling back to API call...');
+        try {
+          const statusData = await this.client.getMediaStatus(this.mediaData);
+          
+          if (statusData.watchUrl) {
+            this.log('Opening Jellyfin URL from API:', statusData.watchUrl);
+            window.open(statusData.watchUrl, '_blank');
+            
+            this.ui.createNotification(
+              'Opening Jellyfin',
+              `Opening "${this.mediaData.title}" on Jellyfin`,
+              'success',
+              3000
+            );
+            
+            return;
+          } else {
+            this.log('No watch URL found in API response:', statusData);
+          }
+        } catch (err) {
+          this.error('Failed to get watch URL from API:', err);
+        }
+        
+        // If we get here, something went wrong - fall through to regular request handling
+        this.ui.createNotification(
+          'Watch URL Not Available',
+          'Could not find Jellyfin watch URL. Trying to request instead...',
+          'warning',
+          4000
+        );
+      }
+    }
+
+    // Regular request handling (when not a "Watch on Jellyfin" button or when watch URL not available)
     try {
       // Update UI to loading state
       if (this.uiTheme === 'flyout') {
@@ -496,6 +596,7 @@ class BaseIntegration {
     // Clear references
     this.uiElements = {};
     this.mediaData = null;
+    this.currentStatusData = null; // Clear cached status data
   }
 
   /**

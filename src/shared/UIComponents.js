@@ -408,6 +408,19 @@ class UIComponents {
         border-color: #10b981;
       }
 
+      .jellyseerr-request-button.watch {
+        background: rgba(16, 185, 129, 0.9);
+        border-color: #10b981;
+        color: white;
+      }
+
+      .jellyseerr-request-button.watch:hover:not(:disabled) {
+        background: rgba(5, 150, 105, 1);
+        border-color: #059669;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+      }
+
       .jellyseerr-request-button.error {
         background: rgba(239, 68, 68, 0.8);
         border-color: #ef4444;
@@ -659,6 +672,18 @@ class UIComponents {
         background: #9ca3af;
         cursor: not-allowed;
         opacity: 0.7;
+      }
+
+      .jellyseerr-action-button.watch {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        border-color: #10b981;
+      }
+
+      .jellyseerr-action-button.watch:hover:not(:disabled) {
+        background: linear-gradient(135deg, #059669 0%, #047857 100%);
+        border-color: #059669;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
       }
 
       /* Tab status colors */
