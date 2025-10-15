@@ -119,7 +119,7 @@ All site integrations share common functionality through the `BaseIntegration` c
 
 If you find this extension useful, consider supporting its development:
 
-[<img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=murphy52&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff")>](https://www.buymeacoffee.com/murphy52)
+[![Foo](https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=murphy52&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff")](https://www.buymeacoffee.com/murphy52)
 
 Your support helps maintain and improve the extension with new features and site integrations!
 
