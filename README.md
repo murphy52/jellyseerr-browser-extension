@@ -119,7 +119,7 @@ All site integrations share common functionality through the `BaseIntegration` c
 
 If you find this extension useful, consider supporting its development:
 
-[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-support%20development-yellow.svg)](https://buymeacoffee.com/murphy52)
+<a href="https://www.buymeacoffee.com/murphy52"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=murphy52&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff" /></a>
 
 Your support helps maintain and improve the extension with new features and site integrations!
 
