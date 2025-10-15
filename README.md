@@ -28,18 +28,20 @@ A browser extension that seamlessly integrates with popular movie and TV sites, 
 ## Installation
 
 ### Chrome/Edge
-1. Download or clone this repository
-2. Open Chrome and navigate to `chrome://extensions/`
-3. Enable "Developer mode" in the top right
-4. Click "Load unpacked" and select the extension folder
-5. The extension will be installed and ready to configure
+1. **Download** the latest release: [Download ZIP](https://github.com/murphy52/jellyseerr-browser-extension/archive/refs/heads/main.zip)
+2. **Extract** the downloaded ZIP file to a folder on your computer
+3. Open Chrome and navigate to `chrome://extensions/`
+4. Enable "Developer mode" in the top right corner
+5. Click "Load unpacked" and select the extracted `jellyseerr-browser-extension-main` folder
+6. The extension will be installed and ready to configure
 
 ### Firefox
-1. Download or clone this repository
-2. Open Firefox and navigate to `about:debugging`
-3. Click "This Firefox" in the left sidebar
-4. Click "Load Temporary Add-on"
-5. Select the `manifest.json` file from the extension folder
+1. **Download** the latest release: [Download ZIP](https://github.com/murphy52/jellyseerr-browser-extension/archive/refs/heads/main.zip)
+2. **Extract** the downloaded ZIP file to a folder on your computer
+3. Open Firefox and navigate to `about:debugging`
+4. Click "This Firefox" in the left sidebar
+5. Click "Load Temporary Add-on"
+6. Navigate to the extracted folder and select the `manifest.json` file
 
 ## Setup
 
