@@ -63,6 +63,26 @@ A browser extension that seamlessly integrates with popular movie and TV sites, 
 - 🔵 **Blue**: Currently downloading/processing
 - 🔴 **Red**: Error or connection issue
 
+## Screenshots
+
+See the extension in action across different movie and TV sites:
+
+### IMDb Integration
+![IMDb Integration](screenshots/imdb%20Large.jpeg)
+*Clean flyout interface on IMDb movie pages with yellow theme matching IMDb's branding*
+
+### Rotten Tomatoes Integration
+![Rotten Tomatoes Integration](screenshots/RottenTomatoes%20Large.jpeg)
+*Elegant red-themed flyout matching Rotten Tomatoes' signature colors*
+
+### Letterboxd Integration
+![Letterboxd Integration](screenshots/letterboxd%20Large.jpeg)
+*Minimalist green-themed design perfectly suited for the film community platform*
+
+### Trakt Integration
+![Trakt Integration](screenshots/trakt%20Large.jpeg)
+*Purple gradient theme matching Trakt's modern branding with comprehensive status display*
+
 ## Architecture
 
 The extension uses a modern shared library architecture:
