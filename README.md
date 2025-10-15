@@ -115,6 +115,14 @@ src/
 
 All site integrations share common functionality through the `BaseIntegration` class, making it easy to add new sites with minimal code.
 
+## Support
+
+If you find this extension useful, consider supporting its development:
+
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-support%20development-yellow.svg)](https://buymeacoffee.com/murphy52)
+
+Your support helps maintain and improve the extension with new features and site integrations!
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
