@@ -1,4 +1,4 @@
-# 🧪 **Jellyseerr Extension Testing Checklist - v1.4.0**
+# 🧪 **Jellyseerr Extension Testing Checklist - v2.0.0**
 
 ## 📋 **Pre-Testing Setup**
 - [ ] Extension loaded in developer mode  

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Jellyseerr Request Button",
-  "version": "1.4.1",
+  "version": "2.0.0",
   "description": "Add movies and TV shows to Jellyseerr directly from IMDB, Rotten Tomatoes, TheMovieDB, Letterboxd, Metacritic, and Trakt",
   "permissions": [
     "storage",
@@ -22,6 +22,8 @@
     "https://www.trakt.tv/*",
     "https://app.trakt.tv/*",
     "http://localhost/*",
+    "https://localhost/*",
+    "http://*/*",
     "https://*/*"
   ],
   "content_scripts": [
