@@ -24,12 +24,12 @@ A browser extension that seamlessly integrates with popular movie and TV sites, 
 
 ## Features
 
-- ✨ **Unified Flyout Interface** - Consistent design across all supported sites
-- 🎯 **Smart Media Detection** - Automatically extracts title, year, and media type
-- 📊 **Real-time Status** - Shows current request status with color indicators
-- 🔄 **Intelligent Retry** - Handles network issues gracefully
-- 🎨 **Brand Theming** - Each site maintains its unique visual identity
-- ⚡ **Fast Performance** - Lightweight and optimized
+- **Unified Flyout Interface** - Consistent design across all supported sites
+- **Smart Media Detection** - Automatically extracts title, year, and media type
+- **Real-time Status** - Shows current request status with color indicators
+- **Intelligent Retry** - Handles network issues gracefully
+- **Brand Theming** - Each site maintains its unique visual identity
+- **Fast Performance** - Lightweight and optimized
 
 ## Installation
 
