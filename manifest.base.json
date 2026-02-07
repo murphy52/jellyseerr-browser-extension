@@ -122,9 +122,6 @@
       "run_at": "document_end"
     }
   ],
-  "background": {
-    "service_worker": "src/background/background.js"
-  },
   "action": {
     "default_popup": "src/popup/popup.html",
     "default_title": "Jellyseerr Request Button"

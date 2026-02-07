@@ -5,7 +5,7 @@ class UIComponents {
   constructor(options = {}) {
     this.debug = options.debug || false;
     this.siteName = options.siteName || 'UNKNOWN';
-    this.theme = options.theme || 'default'; // 'default', 'flyout', 'minimal'
+    this.theme = options.theme || 'default';
   }
 
   log(...args) {
@@ -13,340 +13,217 @@ class UIComponents {
   }
 
   /**
-   * Create a notification element
-   * @param {string} title - Notification title
-   * @param {string} message - Notification message
-   * @param {string} type - 'success', 'error', 'info', 'warning'
-   * @param {number} duration - Auto-dismiss duration in ms (0 = no auto-dismiss)
-   * @returns {HTMLElement} Notification element
+   * Helper to create DOM elements with attributes and children
    */
-  createNotification(title, message, type = 'info', duration = 5000) {
-    const notification = document.createElement('div');
-    notification.className = `jellyseerr-notification ${type}`;
-    notification.innerHTML = `
-      <div class="jellyseerr-notification-title">${title}</div>
-      <div class="jellyseerr-notification-message">${message}</div>
-      <button class="jellyseerr-notification-close">&times;</button>
-    `;
-
-    // Add close functionality
-    const closeBtn = notification.querySelector('.jellyseerr-notification-close');
-    closeBtn.addEventListener('click', () => {
-      this.removeNotification(notification);
+  el(tag, props = {}, children = []) {
+    const element = document.createElement(tag);
+    Object.entries(props).forEach(([key, value]) => {
+      if (key === 'className') element.className = value;
+      else if (key === 'textContent') element.textContent = value;
+      else element.setAttribute(key, value);
     });
+    children.forEach(child => child && element.appendChild(child));
+    return element;
+  }
 
-    // Auto-remove if duration specified
+  /**
+   * Helper to create SVG icons
+   */
+  svg(path, options = {}) {
+    const size = options.size || 16;
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('class', options.className || 'jellyseerr-button-icon');
+    svg.setAttribute('width', size);
+    svg.setAttribute('height', size);
+    svg.setAttribute('viewBox', '0 0 24 24');
+    svg.setAttribute('fill', 'currentColor');
+
+    const pathEl = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    pathEl.setAttribute('d', path);
+    if (options.pathClass) pathEl.setAttribute('class', options.pathClass);
+    
+    svg.appendChild(pathEl);
+    return svg;
+  }
+
+  createNotification(title, message, type = 'info', duration = 5000) {
+    const closeBtn = this.el('button', { className: 'jellyseerr-notification-close', textContent: '×' });
+    const notification = this.el('div', { className: `jellyseerr-notification ${type}` }, [
+      this.el('div', { className: 'jellyseerr-notification-title', textContent: title }),
+      this.el('div', { className: 'jellyseerr-notification-message', textContent: message }),
+      closeBtn
+    ]);
+
+    closeBtn.addEventListener('click', () => this.removeNotification(notification));
+
     if (duration > 0) {
-      setTimeout(() => {
-        this.removeNotification(notification);
-      }, duration);
+      setTimeout(() => this.removeNotification(notification), duration);
     }
 
-    // Add to page
     document.body.appendChild(notification);
     this.log('Notification created:', type, title);
-
     return notification;
   }
 
-  /**
-   * Remove notification with animation
-   * @param {HTMLElement} notification - Notification element to remove
-   */
   removeNotification(notification) {
-    if (notification && notification.parentNode) {
+    if (notification?.parentNode) {
       notification.style.opacity = '0';
       notification.style.transform = 'translateX(100%)';
-      setTimeout(() => {
-        if (notification.parentNode) {
-          notification.remove();
-        }
-      }, 300);
+      setTimeout(() => notification.parentNode?.remove(), 300);
     }
   }
 
-  /**
-   * Create a simple request button (IMDB/TMDb style)
-   * @param {Object} options - Button configuration
-   * @returns {HTMLElement} Button element
-   */
   createRequestButton(options = {}) {
-    const button = document.createElement('button');
-    button.className = 'jellyseerr-request-button request';
-    button.innerHTML = `
-      <svg class="jellyseerr-button-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
-      </svg>
-      <span>${options.text || 'Request on Jellyseerr'}</span>
-    `;
+    const button = this.el('button', { className: 'jellyseerr-request-button request' }, [
+      this.svg('M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z'),
+      this.el('span', { textContent: options.text || 'Request on Jellyseerr' })
+    ]);
 
-    if (options.disabled) {
-      button.disabled = true;
-    }
-
+    if (options.disabled) button.disabled = true;
     this.log('Request button created');
     return button;
   }
 
-  /**
-   * Update button appearance based on status
-   * @param {HTMLElement} button - Button element
-   * @param {Object} statusData - Status information
-   */
   updateButtonStatus(button, statusData) {
     if (!button) return;
 
     button.classList.remove('loading', 'success', 'error', 'pending', 'available', 'downloading');
     button.classList.add(statusData.buttonClass || 'request');
     
-    // Disable button for pending/requested status (Issue #3 fix)
-    const shouldDisable = statusData.disabled || 
-                         statusData.status === 'pending' || 
-                         statusData.status === 'requested' ||
-                         statusData.status === 'downloading';
-    button.disabled = shouldDisable;
+    button.disabled = statusData.disabled || 
+                     ['pending', 'requested', 'downloading'].includes(statusData.status);
 
-    let iconPath = 'M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z'; // Default plus icon
+    const iconPath = this.getIconPath(statusData.status);
+    
+    button.innerHTML = '';
+    button.appendChild(this.svg(iconPath));
+    button.appendChild(this.el('span', { textContent: statusData.buttonText || 'Request on Jellyseerr' }));
 
-    // Use consistent icons with tab icons for each status
-    switch (statusData.status) {
-      case 'pending':
-      case 'requested':
-        iconPath = 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z'; // Clock (matches tab)
-        break;
-      case 'downloading':
-        iconPath = 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm3 11l-4 4-4-4h3V9h2v4h3z'; // Download with circle (matches tab)
-        break;
-      case 'available':
-        iconPath = 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z'; // Plus icon (matches tab)
-        break;
-      case 'ready':
-      case 'available_watch':
-        iconPath = 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z'; // Checkmark (matches tab)
-        break;
-      case 'partial':
-        iconPath = 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z'; // Checkmark since content is available (matches tab)
-        break;
-      case 'error':
-        iconPath = 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm3.5 6L12 10.5 8.5 8 7 9.5 10.5 12 7 14.5 8.5 16 12 13.5 15.5 16 17 14.5 13.5 12 17 9.5 15.5 8z'; // X (matches tab)
-        break;
-    }
-
-    button.innerHTML = `
-      <svg class="jellyseerr-button-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-        <path d="${iconPath}"/>
-      </svg>
-      <span>${statusData.buttonText || 'Request on Jellyseerr'}</span>
-    `;
-
-    this.log('Button status updated:', statusData.status, statusData.buttonText);
+    this.log('Button status updated:', statusData.status);
   }
 
-  /**
-   * Create a flyout interface (RT style, adaptable for other sites)
-   * @param {Object} options - Flyout configuration
-   * @returns {Object} Flyout elements { flyout, tab, panel }
-   */
-  createFlyout(options = {}) {
-    const flyoutId = `jellyseerr-flyout-${this.siteName.toLowerCase()}`;
-    
-    // Remove existing flyout if it exists
-    const existingFlyout = document.getElementById(flyoutId);
-    if (existingFlyout) {
-      existingFlyout.remove();
+  getIconPath(status) {
+    switch (status) {
+      case 'pending':
+      case 'requested':
+        return 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z';
+      case 'downloading':
+        return 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm3 11l-4 4-4-4h3V9h2v4h3z';
+      case 'available':
+        return 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z';
+      case 'ready':
+      case 'available_watch':
+      case 'partial':
+        return 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z';
+      case 'error':
+        return 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm3.5 6L12 10.5 8.5 8 7 9.5 10.5 12 7 14.5 8.5 16 12 13.5 15.5 16 17 14.5 13.5 12 17 9.5 15.5 8z';
+      default:
+        return 'M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z';
     }
+  }
 
-    // Create main flyout container
-    const flyout = document.createElement('div');
-    flyout.id = flyoutId;
-    flyout.className = 'jellyseerr-flyout collapsed';
-    
-    // Create tab (always visible part)
-    const tab = document.createElement('div');
-    tab.className = 'jellyseerr-tab';
-    tab.innerHTML = `
-      <svg class="jellyseerr-tab-icon jellyseerr-connection-status checking" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-        <path class="jellyseerr-icon-path" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-      </svg>
-      <span class="jellyseerr-tab-text">Jellyseerr</span>
-    `;
-    
-    // Create content panel
-    const panel = document.createElement('div');
-    panel.className = 'jellyseerr-panel';
-    
-    // Add toggle functionality
+  createFlyout() {
+    const flyoutId = `jellyseerr-flyout-${this.siteName.toLowerCase()}`;
+    document.getElementById(flyoutId)?.remove();
+
+    const tab = this.el('div', { className: 'jellyseerr-tab' }, [
+      this.svg('M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z', {
+        size: 24,
+        className: 'jellyseerr-tab-icon jellyseerr-connection-status checking',
+        pathClass: 'jellyseerr-icon-path'
+      }),
+      this.el('span', { className: 'jellyseerr-tab-text', textContent: 'Jellyseerr' })
+    ]);
+
+    const panel = this.el('div', { className: 'jellyseerr-panel' });
+    const flyout = this.el('div', { id: flyoutId, className: 'jellyseerr-flyout collapsed' }, [tab, panel]);
+
     tab.addEventListener('click', () => {
       flyout.classList.toggle('collapsed');
       flyout.classList.toggle('expanded');
-      this.log('Flyout toggled:', flyout.classList.contains('expanded') ? 'expanded' : 'collapsed');
     });
-    
-    // Assemble flyout
-    flyout.appendChild(tab);
-    flyout.appendChild(panel);
-    
+
     this.log('Flyout created');
     return { flyout, tab, panel };
   }
 
-  /**
-   * Create flyout content (media info + status + button)
-   * @param {Object} mediaData - Media information
-   * @param {HTMLElement} panel - Panel element to populate
-   * @returns {Object} Created elements { statusSection, button }
-   */
   createFlyoutContent(mediaData, panel) {
-    // Status section
-    const statusSection = document.createElement('div');
-    statusSection.className = 'jellyseerr-status-section';
-    statusSection.innerHTML = `
-      <div class="jellyseerr-media-info">
-        <h3 class="jellyseerr-title">${mediaData.title || 'Unknown Title'}</h3>
-        <p class="jellyseerr-year">${mediaData.year || 'Unknown Year'} • ${mediaData.mediaType === 'tv' ? 'TV Series' : 'Movie'}</p>
-      </div>
-      <div class="jellyseerr-status-indicator">
-        <div class="jellyseerr-status-icon loading"></div>
-        <span class="jellyseerr-status-text">Connecting to Jellyseerr...</span>
-      </div>
-    `;
+    const statusIcon = this.el('div', { className: 'jellyseerr-status-icon loading' });
+    const statusText = this.el('span', { className: 'jellyseerr-status-text', textContent: 'Connecting to Jellyseerr...' });
     
-    // Action button
-    const button = document.createElement('button');
-    button.className = 'jellyseerr-action-button loading';
-    button.disabled = true;
-    button.innerHTML = `
-      <svg class="jellyseerr-button-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-      </svg>
-      <span>Connecting to Jellyseerr...</span>
-    `;
-    
-    // Assemble panel
+    const statusSection = this.el('div', { className: 'jellyseerr-status-section' }, [
+      this.el('div', { className: 'jellyseerr-media-info' }, [
+        this.el('h3', { className: 'jellyseerr-title', textContent: mediaData.title || 'Unknown Title' }),
+        this.el('p', { className: 'jellyseerr-year', textContent: `${mediaData.year || 'Unknown Year'} • ${mediaData.mediaType === 'tv' ? 'TV Series' : 'Movie'}` })
+      ]),
+      this.el('div', { className: 'jellyseerr-status-indicator' }, [statusIcon, statusText])
+    ]);
+
+    const button = this.el('button', { className: 'jellyseerr-action-button loading', disabled: 'true' }, [
+      this.svg('M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z', { size: 20 }),
+      this.el('span', { textContent: 'Connecting to Jellyseerr...' })
+    ]);
+
     panel.appendChild(statusSection);
     panel.appendChild(button);
-    
-    this.log('Flyout content created for:', mediaData.title);
-    return { 
-      statusSection, 
-      button, 
-      statusIcon: statusSection.querySelector('.jellyseerr-status-icon'),
-      statusText: statusSection.querySelector('.jellyseerr-status-text')
-    };
+
+    return { statusSection, button, statusIcon, statusText };
   }
 
-  /**
-   * Update flyout status indicators
-   * @param {Object} elements - Flyout elements from createFlyoutContent
-   * @param {Object} statusData - Status information
-   */
   updateFlyoutStatus(elements, statusData) {
     const { statusIcon, statusText, button } = elements;
     
-    // Update status indicator
     if (statusIcon && statusText) {
       statusIcon.className = `jellyseerr-status-icon ${statusData.status || 'loading'}`;
       
-      // Add monitoring indicator if available (Issue #4)
-      let statusMessage = statusData.message || 'Connecting to Jellyseerr...';
-      if (statusData.monitoring && statusData.monitoring.message) {
-        statusMessage = `${statusData.monitoring.indicator} ${statusData.monitoring.message}`;
-        this.log('Added monitoring indicator:', statusData.monitoring);
+      let message = statusData.message || 'Connecting to Jellyseerr...';
+      if (statusData.monitoring?.message) {
+        message = `${statusData.monitoring.indicator} ${statusData.monitoring.message}`;
       }
-      
-      statusText.textContent = statusMessage;
+      statusText.textContent = message;
     }
     
-    // Update action button
-    if (button) {
-      this.updateButtonStatus(button, statusData);
-    }
-    
-    this.log('Flyout status updated:', statusData.status);
+    if (button) this.updateButtonStatus(button, statusData);
   }
 
-  /**
-   * Update flyout tab icon based on connection status and optionally set tooltip
-   * @param {HTMLElement} tab - Tab element
-   * @param {string} status - Status: 'checking', 'available', 'pending', 'downloading', 'ready', 'error'
-   * @param {Object} statusData - Optional status data with tooltip info
-   */
   updateTabIcon(tab, status, statusData = null) {
     const iconElement = tab.querySelector('.jellyseerr-connection-status');
     const pathElement = tab.querySelector('.jellyseerr-icon-path');
     
     if (!iconElement || !pathElement) return;
-    
-    let statusClass, iconPath;
-    
-    switch (status) {
-      case 'checking':
-      case 'loading':
-        statusClass = 'jellyseerr-tab-icon jellyseerr-connection-status checking';
-        iconPath = 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z';
-        break;
-      case 'available':
-        statusClass = 'jellyseerr-tab-icon jellyseerr-connection-status available';
-        iconPath = 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z';
-        break;
-      case 'pending':
-      case 'requested':
-        statusClass = 'jellyseerr-tab-icon jellyseerr-connection-status pending';
-        iconPath = 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z';
-        break;
-      case 'downloading':
-        statusClass = 'jellyseerr-tab-icon jellyseerr-connection-status downloading';
-        iconPath = 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm3 11l-4 4-4-4h3V9h2v4h3z';
-        break;
-      case 'ready':
-      case 'available_watch':
-        statusClass = 'jellyseerr-tab-icon jellyseerr-connection-status ready';
-        iconPath = 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z';
-        break;
-      case 'partial':
-        statusClass = 'jellyseerr-tab-icon jellyseerr-connection-status partial';
-        iconPath = 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z'; // Checkmark since content is available
-        break;
-      case 'error':
-      default:
-        statusClass = 'jellyseerr-tab-icon jellyseerr-connection-status error';
-        iconPath = 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm3.5 6L12 10.5 8.5 8 7 9.5 10.5 12 7 14.5 8.5 16 12 13.5 15.5 16 17 14.5 13.5 12 17 9.5 15.5 8z';
-        break;
-    }
-    
-    iconElement.setAttribute('class', statusClass);
+
+    const iconPath = this.getIconPath(status);
+    const statusClasses = {
+      checking: 'checking',
+      loading: 'checking',
+      available: 'available',
+      pending: 'pending',
+      requested: 'pending',
+      downloading: 'downloading',
+      ready: 'ready',
+      available_watch: 'ready',
+      partial: 'partial',
+      error: 'error'
+    };
+
+    iconElement.setAttribute('class', `jellyseerr-tab-icon jellyseerr-connection-status ${statusClasses[status] || 'error'}`);
     pathElement.setAttribute('d', iconPath);
     
-    // Update tooltip with status message and monitoring info (Issue #4)
     if (statusData) {
-      let tooltipText = statusData.message || `Jellyseerr - ${status}`;
-      if (statusData.monitoring && statusData.monitoring.message) {
-        tooltipText += ` ${statusData.monitoring.indicator} ${statusData.monitoring.message}`;
-        this.log('Added monitoring indicator to tab tooltip:', statusData.monitoring);
+      let tooltip = statusData.message || `Jellyseerr - ${status}`;
+      if (statusData.monitoring?.message) {
+        tooltip += ` ${statusData.monitoring.indicator} ${statusData.monitoring.message}`;
       }
-      tab.title = tooltipText;
+      tab.title = tooltip;
     }
-    
-    this.log('Tab icon updated to status:', status);
   }
 
-  /**
-   * Inject shared CSS styles for UI components
-   * @param {string} additionalCSS - Site-specific CSS to include
-   */
   injectStyles(additionalCSS = '') {
     const styleId = `jellyseerr-styles-${this.siteName.toLowerCase()}`;
-    
-    if (document.getElementById(styleId)) {
-      return; // Already injected
-    }
+    if (document.getElementById(styleId)) return;
 
-    const styleElement = document.createElement('style');
-    styleElement.id = styleId;
-    styleElement.textContent = this.getSharedCSS() + additionalCSS;
-    document.head.appendChild(styleElement);
-    
-    this.log('Shared styles injected');
+    const style = this.el('style', { id: styleId, textContent: this.getSharedCSS() + additionalCSS });
+    document.head.appendChild(style);
   }
 
   /**
