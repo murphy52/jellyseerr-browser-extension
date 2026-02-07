@@ -7,32 +7,32 @@ class BaseIntegration {
     this.debug = options.debug || false;
     this.uiTheme = options.uiTheme || 'button'; // 'button' or 'flyout'
     this.retryDelay = options.retryDelay || 2000;
-    
+
     // Initialize shared components
     this.client = new JellyseerrClient({
       debug: this.debug,
       siteName: this.siteName,
       retryAttempts: options.retryAttempts || 3
     });
-    
+
     this.extractor = new MediaExtractor({
       debug: this.debug,
       siteName: this.siteName
     });
-    
+
     this.ui = new UIComponents({
       debug: this.debug,
       siteName: this.siteName,
       theme: this.uiTheme
     });
-    
+
     // State
     this.mediaData = null;
     this.uiElements = {};
     this.currentUrl = window.location.href;
     this.navigationListener = null;
     this.currentStatusData = null; // Cache current status data for performance
-    
+
     this.log('BaseIntegration initialized for', this.siteName);
   }
 
@@ -45,15 +45,29 @@ class BaseIntegration {
   }
 
   /**
+   * Check if flyout is currently expanded
+   */
+  isFlyoutExpanded() {
+    return this.uiElements.flyout?.classList.contains('expanded');
+  }
+
+  /**
+   * Check if flyout exists in the DOM
+   */
+  hasFlyout() {
+    return this.uiElements.flyout && this.uiElements.flyout.parentNode;
+  }
+
+  /**
    * Initialize the integration
    * Should be called by child classes
    */
   async init() {
     this.log('Initializing integration...');
-    
+
     // Inject shared styles
     this.ui.injectStyles(this.getSiteSpecificCSS());
-    
+
     // Wait for page to be ready
     if (document.readyState === 'loading') {
       this.log('Document loading, waiting for DOMContentLoaded');
@@ -82,7 +96,7 @@ class BaseIntegration {
       this.log('Starting media data extraction...');
       const mediaData = await this.extractMediaData();
       this.log('Extracted media data:', mediaData);
-      
+
       if (mediaData && mediaData.title) {
         this.mediaData = mediaData;
         this.log('Valid media data found, setting up UI...');
@@ -127,7 +141,13 @@ class BaseIntegration {
    */
   async setupButtonUI() {
     this.log('Setting up button UI...');
-    
+
+    // Check if button already exists
+    if (this.uiElements.button && this.uiElements.button.parentNode) {
+      this.log('Button already exists, skipping setup');
+      return;
+    }
+
     // Find insertion point (must be implemented by child class)
     const insertionPoint = this.getButtonInsertionPoint();
     if (!insertionPoint) {
@@ -149,7 +169,7 @@ class BaseIntegration {
 
     // Update with status
     await this.updateStatus();
-    
+
     this.log('Button UI setup complete');
   }
 
@@ -158,28 +178,38 @@ class BaseIntegration {
    */
   async setupFlyoutUI() {
     this.log('Setting up flyout UI...');
-    
-    // Create flyout
+
+    // Preserve expanded flyout - don't recreate
+    if (this.isFlyoutExpanded()) {
+      this.log('Flyout is already expanded, skipping setup');
+      return;
+    }
+
+    // Remove existing collapsed flyout
+    if (this.hasFlyout()) {
+      this.log('Removing existing collapsed flyout');
+      this.uiElements.flyout.parentNode.removeChild(this.uiElements.flyout);
+    }
+
+    // Create new flyout
     const { flyout, tab, panel } = this.ui.createFlyout();
-    
-    // Create flyout content
     const elements = this.ui.createFlyoutContent(this.mediaData, panel);
-    
+
     // Add click handler to button
     elements.button.addEventListener('click', () => this.handleRequest());
-    
+
     // Add flyout to page
     document.body.appendChild(flyout);
-    
+
     // Store references
     this.uiElements = { flyout, tab, panel, ...elements };
-    
+
     // Setup debug functions
     this.setupDebugFunctions();
-    
+
     // Update with status
     await this.updateStatus();
-    
+
     this.log('Flyout UI setup complete');
   }
 
@@ -197,19 +227,19 @@ class BaseIntegration {
   async updateStatus() {
     try {
       this.log('Updating status...');
-      
+
       // Update tab icon to loading state
       if (this.uiElements.tab) {
         this.ui.updateTabIcon(this.uiElements.tab, 'checking');
       }
-      
+
       // Get status from Jellyseerr
       const statusData = await this.client.getMediaStatus(this.mediaData);
       this.log('Status received:', statusData);
-      
+
       // Cache status data for instant access during button clicks
       this.currentStatusData = statusData;
-      
+
       // Update UI based on theme
       if (this.uiTheme === 'flyout') {
         this.ui.updateFlyoutStatus(this.uiElements, statusData);
@@ -217,15 +247,15 @@ class BaseIntegration {
       } else {
         this.ui.updateButtonStatus(this.uiElements.button, statusData);
       }
-      
+
     } catch (err) {
       this.error('Error updating status:', err);
       this.log('Error details:', err.message);
-      
+
       // Handle errors appropriately - be more specific about error types
       const errorStatus = this.getErrorStatus(err);
       this.log('Determined error status:', errorStatus);
-      
+
       if (this.uiTheme === 'flyout') {
         this.ui.updateFlyoutStatus(this.uiElements, errorStatus);
         
@@ -250,118 +280,90 @@ class BaseIntegration {
 
     this.log('Handling request for:', this.mediaData.title);
 
-    // Check if this is a "Watch on Jellyfin" button click
     const currentButton = this.uiTheme === 'flyout' ? this.uiElements.button : this.uiElements.button;
-    const buttonText = currentButton ? currentButton.querySelector('span')?.textContent : '';
+    const buttonText = currentButton?.querySelector('span')?.textContent ?? '';
     const isWatchButton = buttonText === 'Watch on Jellyfin' || currentButton?.classList.contains('watch');
-    
-    this.log('Button analysis:', {
-      buttonText,
-      hasWatchClass: currentButton?.classList.contains('watch'),
-      isWatchButton
-    });
 
-    // If it's a "Watch on Jellyfin" button, use cached watch URL for instant response
+    this.log('Button analysis:', { buttonText, isWatchButton });
+
     if (isWatchButton) {
-      this.log('Detected Watch on Jellyfin button click');
-      
-      // First show immediate loading state
-      if (this.uiTheme === 'flyout') {
-        this.ui.updateFlyoutStatus(this.uiElements, {
-          status: 'loading',
-          message: `Opening "${this.mediaData.title}" on Jellyfin...`,
-          buttonText: 'Opening...',
-          disabled: true
-        });
-      } else {
-        this.ui.updateButtonStatus(this.uiElements.button, {
-          status: 'loading',
-          buttonText: 'Opening...',
-          disabled: true
-        });
-      }
-      
-      // Check if we have cached status data with watch URL
-      if (this.currentStatusData && this.currentStatusData.watchUrl) {
-        this.log('Using cached watch URL:', this.currentStatusData.watchUrl);
-        
-        // Open immediately with cached URL
-        setTimeout(() => {
-          window.open(this.currentStatusData.watchUrl, '_blank');
-          
-          // Show success notification
-          this.ui.createNotification(
-            'Opening Jellyfin',
-            `Opening "${this.mediaData.title}" on Jellyfin`,
-            'success',
-            3000
-          );
-          
-          // Reset button state after a short delay
-          setTimeout(() => {
-            if (this.currentStatusData) {
-              if (this.uiTheme === 'flyout') {
-                this.ui.updateFlyoutStatus(this.uiElements, this.currentStatusData);
-              } else {
-                this.ui.updateButtonStatus(this.uiElements.button, this.currentStatusData);
-              }
-            }
-          }, 500);
-        }, 100); // Very short delay for visual feedback
-        
-        return; // Exit early - we opened Jellyfin
-      } else {
-        // No cached watch URL, fall back to API call (shouldn't normally happen)
-        this.log('No cached watch URL, falling back to API call...');
-        try {
-          const statusData = await this.client.getMediaStatus(this.mediaData);
-          
-          if (statusData.watchUrl) {
-            this.log('Opening Jellyfin URL from API:', statusData.watchUrl);
-            window.open(statusData.watchUrl, '_blank');
-            
-            this.ui.createNotification(
-              'Opening Jellyfin',
-              `Opening "${this.mediaData.title}" on Jellyfin`,
-              'success',
-              3000
-            );
-            
-            return;
-          } else {
-            this.log('No watch URL found in API response:', statusData);
-          }
-        } catch (err) {
-          this.error('Failed to get watch URL from API:', err);
-        }
-        
-        // If we get here, something went wrong - fall through to regular request handling
-        this.ui.createNotification(
-          'Watch URL Not Available',
-          'Could not find Jellyfin watch URL. Trying to request instead...',
-          'warning',
-          4000
-        );
-      }
+      await this.handleWatchButtonClick();
+    } else {
+      await this.handleRequestButtonClick();
+    }
+  }
+
+  /**
+   * Handle "Watch on Jellyfin" button click
+   */
+  async handleWatchButtonClick() {
+    this.log('Detected Watch on Jellyfin button click');
+
+    this.setUILoading(`Opening "${this.mediaData.title}" on Jellyfin...`, 'Opening...');
+
+    // Try to use cached watch URL first
+    if (this.currentStatusData?.watchUrl) {
+      this.log('Using cached watch URL');
+      await this.openJellyfin(this.currentStatusData.watchUrl);
+      return;
     }
 
-    // Regular request handling (when not a "Watch on Jellyfin" button or when watch URL not available)
+    // Fall back to API call
+    this.log('No cached watch URL, fetching from API');
     try {
-      // Update UI to loading state
-      if (this.uiTheme === 'flyout') {
-        this.ui.updateFlyoutStatus(this.uiElements, {
-          status: 'loading',
-          message: `Requesting "${this.mediaData.title}"...`,
-          buttonText: 'Requesting...',
-          disabled: true
-        });
-      } else {
-        this.ui.updateButtonStatus(this.uiElements.button, {
-          status: 'loading',
-          buttonText: 'Requesting...',
-          disabled: true
-        });
+      const statusData = await this.client.getMediaStatus(this.mediaData);
+
+      if (statusData.watchUrl) {
+        await this.openJellyfin(statusData.watchUrl);
+        return;
       }
+    } catch (err) {
+      this.error('Failed to get watch URL from API:', err);
+    }
+
+    // If we get here, something went wrong
+    this.ui.createNotification(
+        'Watch URL Not Available',
+        'Could not find Jellyfin watch URL. Trying to request instead...',
+        'warning',
+        4000
+    );
+
+    // Fall through to regular request handling
+    await this.handleRequestButtonClick();
+  }
+
+  /**
+   * Open Jellyfin in a new window
+   */
+  async openJellyfin(watchUrl) {
+    this.log('Opening Jellyfin URL:', watchUrl);
+
+    setTimeout(() => {
+      window.open(watchUrl, '_blank');
+
+      this.ui.createNotification(
+          'Opening Jellyfin',
+          `Opening "${this.mediaData.title}" on Jellyfin`,
+          'success',
+          3000
+      );
+
+      // Reset button state after a short delay
+      setTimeout(() => {
+        if (this.currentStatusData) {
+          this.updateUIFromStatus(this.currentStatusData);
+        }
+      }, 500);
+    }, 100); // Very short delay for visual feedback
+  }
+
+  /**
+   * Handle regular request button click
+   */
+  async handleRequestButtonClick() {
+    try {
+      this.setUILoading(`Requesting "${this.mediaData.title}"...`, 'Requesting...');
 
       // Send request
       const result = await this.client.requestMedia(this.mediaData);
@@ -369,19 +371,17 @@ class BaseIntegration {
 
       // Show success notification
       this.ui.createNotification(
-        'Request Sent!',
-        `${this.mediaData.title} has been added to your Jellyseerr requests`,
-        'success'
+          'Request Sent!',
+          `${this.mediaData.title} has been added to your Jellyseerr requests`,
+          'success'
       );
 
       // Auto-close flyout after success
-      if (this.uiTheme === 'flyout' && this.uiElements.flyout) {
+      if (this.uiTheme === 'flyout' && this.isFlyoutExpanded()) {
         setTimeout(() => {
-          if (this.uiElements.flyout.classList.contains('expanded')) {
-            this.uiElements.flyout.classList.remove('expanded');
-            this.uiElements.flyout.classList.add('collapsed');
-            this.log('Auto-closing flyout after successful request');
-          }
+          this.uiElements.flyout.classList.remove('expanded');
+          this.uiElements.flyout.classList.add('collapsed');
+          this.log('Auto-closing flyout after successful request');
         }, 4000);
       }
 
@@ -392,9 +392,9 @@ class BaseIntegration {
       this.error('Request failed:', err);
 
       this.ui.createNotification(
-        'Request Failed',
-        err.message || 'Failed to send request to Jellyseerr',
-        'error'
+          'Request Failed',
+          err.message || 'Failed to send request to Jellyseerr',
+          'error'
       );
 
       // Reset UI after delay
@@ -403,16 +403,45 @@ class BaseIntegration {
   }
 
   /**
+   * Set UI to loading state
+   */
+  setUILoading(message, buttonText) {
+    const loadingState = {
+      status: 'loading',
+      message,
+      buttonText,
+      disabled: true
+    };
+
+    if (this.uiTheme === 'flyout') {
+      this.ui.updateFlyoutStatus(this.uiElements, loadingState);
+    } else {
+      this.ui.updateButtonStatus(this.uiElements.button, loadingState);
+    }
+  }
+
+  /**
+   * Update UI from cached status data
+   */
+  updateUIFromStatus(statusData) {
+    if (this.uiTheme === 'flyout') {
+      this.ui.updateFlyoutStatus(this.uiElements, statusData);
+    } else {
+      this.ui.updateButtonStatus(this.uiElements.button, statusData);
+    }
+  }
+
+  /**
    * Get error status for UI updates
    */
   getErrorStatus(error) {
     const isServerError = error.message && (
-      error.message.includes('connect') || 
-      error.message.includes('Server URL and API key') ||
-      error.message.includes('Connection failed') ||
-      error.message.toLowerCase().includes('cors')
+        error.message.includes('connect') ||
+        error.message.includes('Server URL and API key') ||
+        error.message.includes('Connection failed') ||
+        error.message.toLowerCase().includes('cors')
     );
-    
+
     if (isServerError) {
       return {
         status: 'error',
@@ -437,7 +466,7 @@ class BaseIntegration {
     if (!window.jellyseerr_debug) {
       window.jellyseerr_debug = {};
     }
-    
+
     window.jellyseerr_debug[this.siteName.toLowerCase()] = {
       updateStatus: () => this.updateStatus(),
       testAPI: () => this.client.debugAPI(),
@@ -481,7 +510,7 @@ class BaseIntegration {
         }
       }
     };
-    
+
     this.log('Debug functions added to window.jellyseerr_debug.' + this.siteName.toLowerCase());
   }
 
@@ -514,11 +543,11 @@ class BaseIntegration {
    */
   setupNavigationDetection() {
     this.log('Setting up SPA navigation detection');
-    
+
     // Method 1: Override pushState and replaceState (most reliable)
     const originalPushState = history.pushState;
     const originalReplaceState = history.replaceState;
-    
+
     const handleNavigation = () => {
       const newUrl = window.location.href;
       if (newUrl !== this.currentUrl) {
@@ -527,23 +556,23 @@ class BaseIntegration {
         this.handleNavigationChange();
       }
     };
-    
+
     // Override history methods
     history.pushState = function(...args) {
       originalPushState.apply(history, args);
       setTimeout(handleNavigation, 100); // Small delay for React to update DOM
     };
-    
+
     history.replaceState = function(...args) {
       originalReplaceState.apply(history, args);
       setTimeout(handleNavigation, 100);
     };
-    
+
     // Method 2: Listen for popstate (back/forward buttons)
     window.addEventListener('popstate', () => {
       setTimeout(handleNavigation, 100);
     });
-    
+
     // Method 3: Polling as fallback (for edge cases)
     this.navigationListener = setInterval(() => {
       const newUrl = window.location.href;
@@ -560,16 +589,22 @@ class BaseIntegration {
    */
   async handleNavigationChange() {
     this.log('Handling navigation change to:', this.currentUrl);
-    
+
+    // Protect expanded flyout from cleanup
+    if (this.isFlyoutExpanded()) {
+      this.log('Flyout is open, deferring navigation handling');
+      return;
+    }
+
     // Clean up existing UI
     this.cleanupUI();
-    
+
     // Wait a bit for the new page content to load
     await new Promise(resolve => setTimeout(resolve, 500));
-    
+
     // Re-extract and setup for the new page
     await this.extractAndSetup();
-    
+
     // Retry after delay for dynamic content
     setTimeout(() => {
       this.log('Retry extraction after navigation');
@@ -582,21 +617,27 @@ class BaseIntegration {
    */
   cleanupUI() {
     this.log('Cleaning up existing UI');
-    
-    // Remove flyout if it exists
-    if (this.uiElements.flyout && this.uiElements.flyout.parentNode) {
+
+    // Protect expanded flyout from removal
+    if (this.isFlyoutExpanded()) {
+      this.log('Flyout is expanded, skipping cleanup');
+      return;
+    }
+
+    // Remove flyout if it exists and is not expanded
+    if (this.hasFlyout()) {
       this.uiElements.flyout.parentNode.removeChild(this.uiElements.flyout);
     }
-    
+
     // Remove button if it exists
     if (this.uiElements.button && this.uiElements.button.parentNode) {
       this.uiElements.button.parentNode.removeChild(this.uiElements.button);
     }
-    
+
     // Clear references
     this.uiElements = {};
     this.mediaData = null;
-    this.currentStatusData = null; // Clear cached status data
+    this.currentStatusData = null;
   }
 
   /**
